@@ -1,0 +1,8 @@
+= <INSERT TITLE HERE>
+
+== About
+Yet another fantasy console. But this one's better.
+
+== Specifications
+Let's put our core specifications here.
+

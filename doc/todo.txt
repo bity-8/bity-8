@@ -1,0 +1,5 @@
+Ah, so what do we actually need to do?
+
+- Library Debates.
+- Finalize requirements document.
+

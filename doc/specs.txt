@@ -1,0 +1,126 @@
+Cartridge Size: 256 kb (262144 bytes, 2097152 bits.)
+
+Resolution:
+  192w x 144h 
+    similar to game boy. but our own thing.
+
+  4 bits per pixel.
+  vram: 13824 bytes (13.5 kb)
+
+Sprites:
+1 - 64 sprite sheets (0 - 63)
+
+  1 sprite sheet: 27648 bits (3456 bytes)
+  1 sprite sheet + palette: 28032 bits (3504 bytes)
+  64 sprite sheets + palettes: 224256 bytes (85.546875%)
+
+  each sprite sheet has a palette in the top left corner.
+
+Each sprite sheet size is 96 x 72 px. (1/4 the area of the screen).
+
+Sprite Size: multiple of 8.
+
+Controller:
+  2 buttons
+  D-pad
+  Start/select
+
+Tile Map:
+  1 - 32 maps (0 - 31 index)
+  1 byte for sprite sheet index.
+  1  maps min = 6913 bytes (72 * 96 + 1)
+    2.637% of cartridge.
+  32 maps max = 221216 bytes (72 * 96 + 1) * 32
+    84.387% of cartridge.
+  4 maps can be stored in ram.
+  96 x 72 tiles for each map. each tile is stored in 1 byte.
+  0-11 x, 0-8 y sprite sheet coordinates
+    Sprite sheet associated with it too, this is 6 bits
+
+Palette: 16-color single palette (user defined from 24 bit color scheme).
+
+Audio:
+  Note: 2 bytes
+    Instruments: 0.5 byte
+      Square
+      Triangle
+      Sawtooth
+      Noise
+      4 slots for custom instruments
+
+      Can load more custom samples into slots 0-4 after boot
+
+      1 byte per sample (amplitude values between -128 and 127)
+      128 samples per instrument
+
+      128 bytes per instrument
+      512 bytes max for custom instruments total
+
+      Stored in upper nibble of byte
+      (upper bit reserved)
+      
+    Volume: 0.5 byte
+      Stored in lower nibble of byte (0-16)
+
+    Tone: 1 byte
+      Chromatic scale starting at A0, ending at C8 (Piano range)
+      88 possible notes
+
+  Measure: 65 bytes, 256 max (6.34% cartridge space, 16640 bytes)
+    Size:
+      32 Notes (2 bytes)
+
+    Tempo:
+      1 byte, controls length of note (lower value = longer notes)
+
+  Staff: 6 bytes, 256 max (0.58% cartridge, 1536 bytes)
+    4 channels
+    1 measure per channel (4 bytes)
+    Channel enable + looping (2 bytes)
+    Upper 4 bits: channel enable
+    Middle 6 bits: loop start
+    Lower 6 bits: loop end
+
+  Song Segment:
+    Max size: 1024 staves, 2048 bytes
+    2 bytes (1 byte [staff index] + 3 bits [loop/stop])
+    Remaining 5 bits reserved
+
+-- Tools --
+The tool for compiling the sprite sheets mentions which sprite sheet is which
+index. right now each sprite sheet must be a separate file each preferably 96 x
+72 px.
+
+-- Cartridge --
+Basic layout: 
+  - header
+    - "BITY-8\0\0"  (8 bytes)
+    - target version (2 bytes)
+      - major (1 byte)
+      - minor (1 byte)
+    - compiled code checksum
+    - asset checksum
+    - compiled size 
+    - sprite section offset  (3 bytes)
+    - map section offset  (3 bytes)
+    - audio offset  (3 bytes)
+  - compressed code
+  - sprites 
+    - number of sheets (1 byte)
+    - sprite sheets
+  - map
+    - number of maps (1 byte)
+    - maps
+  - audio
+    - number of measures (1 byte)
+    - number of staves (1 byte)
+    - number of segments (2 bytes)
+    - audio data
+  - EOF
+
+Magic Number: "BITY-8\0\0"
+
+Note:
+  - The compiled code must fit in the compiled code ram.
+  - The source code is zipped in the cartridge.
+
