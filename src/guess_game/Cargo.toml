@@ -1,0 +1,8 @@
+[package]
+name = "guess_game"
+version = "0.1.0"
+authors = ["Alan Morgan <alanxoc3@gmail.com>"]
+
+[dependencies]
+rand = "*"
+rlua = {git="https://github.com/chucklefish/rlua"}
