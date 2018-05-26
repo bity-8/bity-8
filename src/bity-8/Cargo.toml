@@ -1,0 +1,11 @@
+[package]
+name = "bity-8"
+version = "0.1.0"
+authors = ["MikahJC <mikah.chapman@gmail.com>", "Alan Morgan <alanxoc3@gmail.com>"]
+
+[dependencies]
+hlua = "0.3"
+
+[dependencies.sdl2]
+version = "0.31"
+features = ["image"]
