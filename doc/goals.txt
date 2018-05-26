@@ -8,6 +8,16 @@
 - Cartridge
 - Limit fake CPU speed
 
+- Import spritesheets
+- Import tile map
+- Import custom instruments
+- Import audio
+- Import code
+
+- Basic display
+- Basic audio
+- Basic Lua interaction
+
 ## Goal Deadlines
 
 ### Week 5 - May 20 to May 26
