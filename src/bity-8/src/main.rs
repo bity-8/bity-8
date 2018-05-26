@@ -1,16 +1,19 @@
+//extern crate hlua;
 extern crate sdl2;
 
-mod test;
+mod lua;
+mod display;
 
 use std::env;
 use std::path::Path;
 
 fn main() {
-    let args: Vec<_> = env::args().collect();
+    lua::run_lua_test();
+    // let args: Vec<_> = env::args().collect();
 
-    if args.len() < 2 {
-        println!("Usage: cargo run /path/to/image.(png|jpg)")
-    } else {
-        test::run(Path::new(&args[1]));
-    }
+    // if args.len() < 2 {
+        // println!("Usage: cargo run /path/to/image.(png|jpg)")
+    // } else {
+        // display::run(Path::new(&args[1]));
+    // }
 }
