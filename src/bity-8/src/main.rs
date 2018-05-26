@@ -12,6 +12,6 @@ fn main() {
     if args.len() < 2 {
         println!("Usage: cargo run /path/to/file.lua")
     } else {
-        lua::run(Path::new(&args[1]));
+        lua::load_file(Path::new(&args[1]));
     }
 }
