@@ -1,0 +1,16 @@
+Put your Rust knowledges here.
+
+# For docs :)
+cargo doc
+cargo doc --open
+rustup doc --std
+rustup doc --book
+
+# For updating versions of dependencies.
+cargo update
+cargo build
+cargo run
+
+# For updating versions of dependencies.
+cargo new --bin PROJ_NAME
+cargo new --lib LIB_NAME
