@@ -49,6 +49,8 @@
 
 ### Week 6 - May 27 to June 2
 - Requirements document
+	- Figure out which things can be moved to stretch goals
+- Get through more of the Rust book
 
 ### Week 7 - June 3 to June 9
 - Finish requirements document
