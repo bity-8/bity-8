@@ -1,6 +1,45 @@
 # Requirements Document
 
+## Goals
+- BITY-8 standard library
+- Audio engine
+- Graphics engine
+- Input
+- Cartridge
+- Limit fake CPU speed
+
 ## Goal Deadlines
+
+### Week 5 - May 20 to May 26
+
+
+### Week 6 - May 27 to June 2
+- Work on requirements document
+- nice :)????
+
+### Week 7 - June 3 to June 9
+- Finish requirements document
+
+
+### Week 8 - June 10 to June 16
+
+
+### Week 9 - June 17 to June 23
+
+
+### Week 10 - June 24 to June 30
+
+
+### Week 11 - July 1 to July 7
+
+
+### Week 12 - July 8 to July 14
+
+
+### Week 13 - July 15 to July 21
+
+
+### Week 14 - July 22 to July 28
 
 
                          A beautiful calendar
