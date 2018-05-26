@@ -5,7 +5,7 @@
 - Audio engine
 - Graphics engine
 - Input
-- Cartridge
+- Cartridge engine
 - Limit fake CPU speed
 
 - Import spritesheets
@@ -17,6 +17,13 @@
 - Basic display
 - Basic audio
 - Basic Lua interaction
+
+- Demo cartridge data
+- Demo cartridge
+
+## In order
+- Demo cartridge data
+- Demo cartridge
 
 ## Goal Deadlines
 
