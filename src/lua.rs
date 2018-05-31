@@ -5,7 +5,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::BufReader;
 
-// loads the file and runs any code in the init.
+// loads and evaluates the lua file.
 pub fn load_file(file: &Path) {
     // Create lua virtual machine.
     let mut lua = hlua::Lua::new();
@@ -16,9 +16,14 @@ pub fn load_file(file: &Path) {
     let read_res = lua.execute_from_reader::<(), _>(buf_reader);
 
     match read_res {
+        Ok(t) => t,
+        Err(e) => {
+            match e {
+                hlua::LuaError::SyntaxError =>
+                    e
 
+            println!("{}", e);
+            }
+        },
     }
-
-    let val: i32 = lua.get("b").unwrap();
-    println!("executed: {}", val);
 }
