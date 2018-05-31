@@ -1,60 +1,108 @@
 # Requirements Document
 
 ## Goals
-- BITY-8 standard library
-- Audio engine
-- Graphics engine
-- Input
-- Cartridge engine
-- Limit fake CPU speed
-
-- Import spritesheets
-- Import tile map
-- Import custom instruments
-- Import audio
-- Import code
-
-- Basic display
-- Basic audio
-- Basic Lua interaction
-
-- Demo cartridge data
-- Demo cartridge
 
 ## In order
 - Demo cartridge data
-- Demo cartridge
+	- Spritesheets
+	- Tile maps
+	- Custom instruments
+	- Very simple code
+		- Test displaying sprites
+		- Test using tile maps
+		- Test playing sound
+		- Test input
+	- Down the road:
+		- Hardware tests
+		- Standard library tests
+- Audio engine
+	- Play sound
+	- Default instruments
+	- Import custom instruments
+	- Import audio
+- Graphics engine
+	- Import spritesheets
+	- Import tile map
+	- Draw shapes?
+- Input
+	- Configure which keyboard buttons map to which controller buttons
+
+- BITY-8 standard library
+	- Basic Lua interaction
+- Cartridge engine
+	- Parse code
+	- Parse spritesheets
+	- Parse tile maps
+	- Parse audio
+- Limit fake CPU speed
+
+- Demo cartridge (compiled from demo cartridge data)
 
 ## Goal Deadlines
 
 ### Week 5 - May 20 to May 26
-
+- Create timeline
+- Make function that evaluates Lua from a file and a string.
+- Make a function that will call the "_update" from Lua.
+- Make a function that will call the "_draw"   from Lua.
+- Make a function that will call the "_init"   from Lua.
 
 ### Week 6 - May 27 to June 2
-- Work on requirements document
-- nice :)????
+- Requirements document
+	- Figure out which things can be moved to stretch goals
+- Get through more of the Rust book
 
 ### Week 7 - June 3 to June 9
 - Finish requirements document
-
+- Memory layout
+- Cartridge layout
+- Start planning standard library
+- Create stubs for standard library things
 
 ### Week 8 - June 10 to June 16
-
+- Demo cartridge data
+	- Spritesheets
+	- Tile maps
+	- Custom instruments
 
 ### Week 9 - June 17 to June 23
-
+- Audio engine
+	- Play sound
+	- Default instruments
+	- Import custom instruments
+	- Import audio
+- Graphics engine
+	- Import spritesheets
+	- Import tile map
+	- Draw shapes?
+- Input
+	- Configure which keyboard buttons map to which controller buttons
 
 ### Week 10 - June 24 to June 30
-
+- BITY-8 standard library
+	- Basic Lua interaction
 
 ### Week 11 - July 1 to July 7
-
+- Demo cartridge data
+	- Very simple code
+		- Test displaying sprites
+		- Test using tile maps
+		- Test playing sound
+		- Test input
+- Cartridge engine
+	- Parse code
+	- Parse spritesheets
+	- Parse tile maps
+	- Parse audio
 
 ### Week 12 - July 8 to July 14
-
+- Demo cartridge data
+	- Hardware tests
+	- Standard library tests
+- Demo cartridge (compiled from demo cartridge data)
+- Limit fake CPU speed
 
 ### Week 13 - July 15 to July 21
-
 
 ### Week 14 - July 22 to July 28
 
