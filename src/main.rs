@@ -1,4 +1,3 @@
-//extern crate hlua;
 extern crate sdl2;
 extern crate bity_8;
 

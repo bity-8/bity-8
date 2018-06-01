@@ -30,7 +30,11 @@ pub fn load_file(file: &Path) -> hlua::Lua {
     lua
 }
 
-pub fn call_init(mut lua: hlua::Lua) {
+fn call_fn() {
+
+}
+
+pub fn call_init(mut lua: hlua::Lua) -> Result {
     match lua.execute::<()>("_init()") {
         Ok(_v) => (),
         Err(_e) => eprintln!("Error: _init() not found"),
