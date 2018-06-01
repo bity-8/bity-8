@@ -1,2 +1,3 @@
-
-b = 2332
+function init()
+	print("hello")
+end
