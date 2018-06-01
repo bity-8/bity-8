@@ -1,8 +1,8 @@
 //extern crate hlua;
 extern crate sdl2;
+extern crate bity_8;
 
-mod lua;
-
+use bity_8::lua;
 use std::env;
 use std::path::Path;
 
