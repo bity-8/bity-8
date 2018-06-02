@@ -30,27 +30,21 @@ pub fn load_file(file: &Path) -> hlua::Lua {
     lua
 }
 
-fn call_fn() {
-
-}
-
-pub fn call_init(mut lua: hlua::Lua) -> Result {
-    match lua.execute::<()>("_init()") {
-        Ok(_v) => (),
-        Err(_e) => eprintln!("Error: _init() not found"),
+fn call_fn(func_str: &str, mut lua: hlua::Lua) -> Result<(), String> {
+    match lua.execute::<()>(func_str) {
+        Ok(_v) => Ok(_v),
+        Err(_e) => Err(format!("Error: \'{}\' not found.", func_str)),
     }
 }
 
-pub fn call_update(mut lua: hlua::Lua) {
-    match lua.execute::<()>("_update()") {
-        Ok(_v) => (),
-        Err(_e) => eprintln!("Error: _update() not found"),
-    }
+pub fn call_init(lua: hlua::Lua) -> Result<(), String> {
+    call_fn("_init()", lua)
 }
 
-pub fn call_draw(mut lua: hlua::Lua) {
-    match lua.execute::<()>("_draw()") {
-        Ok(_v) => (),
-        Err(_e) => eprintln!("Error: _draw() not found"),
-    }
+pub fn call_update(lua: hlua::Lua) -> Result<(), String> {
+    call_fn("_update()", lua)
+}
+
+pub fn call_draw(lua: hlua::Lua) -> Result<(), String> {
+    call_fn("_draw()", lua)
 }

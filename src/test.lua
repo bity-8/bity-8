@@ -1,3 +1,3 @@
-function init()
+function _init()
 	print("hello")
 end

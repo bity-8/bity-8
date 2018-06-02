@@ -12,8 +12,13 @@ fn main() {
         println!("Usage: cargo run /path/to/file.lua")
     } else {
         let mut l = lua::load_file(Path::new(&args[1]));
-        l.openlibs();
-        lua::call_init(l);
-    }
 
+        // I'm opening the libs for testing. In the final thing, we prob won't open any libs!
+        l.openlibs();
+
+        match lua::call_init(l) {
+            Ok(_v) => (),
+            Err(_e) => eprintln!("{}", _e),
+        }
+    }
 }
