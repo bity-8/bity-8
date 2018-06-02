@@ -1,5 +1,3 @@
-// this is the lua module
-// RIGHT NOW, IT IS VERY MESSY!!!
 extern crate hlua;
 
 use std::fs::File;

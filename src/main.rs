@@ -1,4 +1,3 @@
-extern crate sdl2;
 extern crate bity_8;
 
 use bity_8::lua;
