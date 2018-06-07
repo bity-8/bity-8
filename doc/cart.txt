@@ -1,0 +1,11 @@
+Addresses stored big-endian
+
+0x00000-0x00007: Magic "BITY-8\0\0" (If we drop the extra null character, the
+header will fit within the first 0x000F bytes)
+0x00008-0x0000A: Sprite data offset, 00 00 00 if absent
+0x0000B-0x0000D: Tile Map data offset, 00 00 00 if absent. Sprite data must not
+be absent if this is present.
+0x0000E-0x00010: Audio data offset, 00 00 00 if absent
+0x00011-0x3FFFF: Game data: zipped source code, followed by sprite, tile map,
+and audio data (if applicable)
+
