@@ -1,11 +1,14 @@
 Addresses stored big-endian
 
-0x00000-0x00007: Magic "BITY-8\0\0" (If we drop the extra null character, the
+0x00000-0x00004: Magic "BITY8" (If we drop the extra null character, the
 header will fit within the first 0x000F bytes)
-0x00008-0x0000A: Sprite data offset, 00 00 00 if absent
-0x0000B-0x0000D: Tile Map data offset, 00 00 00 if absent. Sprite data must not
+0x00005        : Major Version
+0x00006        : Minor Version
+0x00007-0x00009: Sprite data offset, 00 00 00 if absent
+0x0000A-0x0000C: Tile Map data offset, 00 00 00 if absent. Sprite data must not
 be absent if this is present.
-0x0000E-0x00010: Audio data offset, 00 00 00 if absent
-0x00011-0x3FFFF: Game data: zipped source code, followed by sprite, tile map,
-and audio data (if applicable)
+0x0000D-0x0000F: Audio data offset, 00 00 00 if absent
+0x00010-0x0001F: Reserved
+0x00020-0x3FFFF: Game data: zipped source code, followed by sprite, tile map,
+and audio data (as applicable)
 
