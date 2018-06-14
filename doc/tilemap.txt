@@ -1,4 +1,7 @@
-Tilemap: Assumes 8x8 sprites
+Tilemap:
+Assumes 8x8 sprites
+Sprites cannot be flipped.
+
 0x0000: Sprite sheet index
 0x0001-0x1B01: Sprite coordinates per square
 
