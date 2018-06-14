@@ -100,7 +100,6 @@ Basic layout:
       - minor (1 byte)
     - compiled code checksum
     - asset checksum
-    - compiled size 
     - sprite section offset  (3 bytes)
     - map section offset  (3 bytes)
     - audio offset  (3 bytes)
