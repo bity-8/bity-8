@@ -1,3 +1,5 @@
+use std::cmp;
+
 pub type Memory = [i8; 0x50000];
 
 pub static LOC_CART: usize = 0x00000; // Cartridge
@@ -15,6 +17,18 @@ pub fn create_memory() -> Memory {
     [0; 0x50000]
 }
 
+// Maps a vector to memory. This is safe.
+pub fn map_vector(mem: &mut Memory, start: usize, len: usize, vec: &[i8]) {
+    let len = cmp::min(vec.len(), len);
+
+    for vec_ind in 0..len {
+        let mem_ind = start+vec_ind;
+        if mem_ind >= LOC_END { return }
+        mem[mem_ind] = vec[vec_ind];
+    }
+}
+
+// Maps one value to memory.
 pub fn map_memory(mem: &mut Memory, start: usize, len: usize, val: i8) {
     for i in start..len {
         mem[i] = val;
@@ -36,8 +50,12 @@ fn test_mem() {
     let mut mem = create_memory();
 
     reset_memory(&mut mem);
+    map_vector(&mut mem, 0, 20, &[2, 4, 5]);
 
-    for i in 0..LOC_EMPT {
+    assert!(mem[0] == 2);
+    assert!(mem[1] == 4);
+    assert!(mem[2] == 5);
+    for i in 3..LOC_EMPT {
         assert!(mem[i] == 0);
     }
 }
