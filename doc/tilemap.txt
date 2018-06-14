@@ -1,0 +1,10 @@
+Tilemap: Assumes 8x8 sprites
+0x0000: Sprite sheet index
+0x0001-0x1B01: Sprite coordinates per square
+
+Sprite Coordinate format:
+Upper Nibble: x coordinate
+Lower Nibble: y coordinate
+
+Designing: Advise writing the tilemap and then appending the sprite sheet
+index at the beginning of the array.
