@@ -1,8 +1,12 @@
-= <INSERT TITLE HERE>
+= Bity-8
 
 == About
 Yet another fantasy console. But this one's better.
 
 == Specifications
 Let's put our core specifications here.
+
+== Testing
+Make sure you test in a single thread like this:
+`cargo test -- --test-threads=1`.
 

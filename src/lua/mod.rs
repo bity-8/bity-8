@@ -1,21 +1,26 @@
 extern crate hlua;
+pub mod std;
 
 use std::fs::File;
 use std::path::Path;
 use std::io::BufReader;
 
 // loads and evaluates the lua file.
-// 
-pub fn load_file(file: &Path) -> hlua::Lua {
-    // Create lua virtual machine.
+pub fn create_lua<'a>() -> hlua::Lua<'a> {
     let mut lua = hlua::Lua::new();
+    std::load_std(&mut lua);
+    lua
+}
 
+pub fn load_file(file: &Path, lua: &mut hlua::Lua) {
+    // Create lua virtual machine.
     let f = File::open(file).expect("file not found");
 
     // The reader must read from a file, and avoids putting the file into memory.
     // If we are okay putting the file into memory as a string first, we could just use the execute
     // function.
     let buf_reader = BufReader::new(f);
+
     let read_res = lua.execute_from_reader::<(), _>(buf_reader);
 
     if let Err(e) = read_res {
@@ -24,11 +29,9 @@ pub fn load_file(file: &Path) -> hlua::Lua {
             _ => eprintln!("Error: {:?}", e)
         }
     }
-
-    lua
 }
 
-fn call_fn(func_str: &str, mut lua: hlua::Lua) -> Result<(), String> {
+pub fn call_fn(func_str: &str, mut lua: hlua::Lua) -> Result<(), String> {
     match lua.execute::<()>(func_str) {
         Ok(_v) => Ok(_v),
         Err(_e) => Err(format!("Error: \'{}\' not found.", func_str)),
