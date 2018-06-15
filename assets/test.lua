@@ -10,5 +10,3 @@ for i=0, 200 do
       print("val "..i.." is "..val)
    end
 end
-
-function _init() end
