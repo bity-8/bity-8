@@ -14,15 +14,16 @@ use memory;
 
 // TODO: make this function more pretty!
 pub fn draw_screen(canvas: &mut WindowCanvas) {
-    let mut pal = memory::get_hard_pal();
+    let mut pal = memory::get_sub_area(memory::LOC_HARD, memory::OFF_HARD_PAL);
     let mut colors = [Color::RGB(0, 255, 0); 16];
 
+    assert_eq!(pal.len(), 16*3);
     for i in 0..16 {
         colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
     }
 
     {
-        let screen = memory::get_scre();
+        let screen = memory::get_area(memory::LOC_SCRE);
         let mut draw_func = |col, x, y| {
             canvas.set_draw_color(col);
             canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
