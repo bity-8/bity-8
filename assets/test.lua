@@ -18,6 +18,7 @@ function _update()
       _mcpy(0x40400 + 0x60 * j, 0x40400, 0x60)
    end
 
+   _mset(0x40400 + 0xd80, 0x1b00, 0)
 end
 
 -- The below test should print NOTHING, because this is all in the read-only
