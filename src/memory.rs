@@ -14,6 +14,9 @@ pub const LOC_EMPT: usize = 0x4E000; // Empty
 pub const LOC_MULT: usize = 0x4F800; // Multicart
 pub const LOC_END : usize = 0x50000; // End of cartridge
 
+// Hardware Config Locations
+pub fn get_hard_pal() -> &'static mut [i8] { unsafe { &mut MEM[LOC_HARD..LOC_HARD+0x30] } }
+
 // Helper funcs for getting certain areas of the cartridge.
 // See how to use these in the test below.
 pub fn get_cart() -> &'static mut [i8] { unsafe { &mut MEM[LOC_CART..LOC_HARD] } }
