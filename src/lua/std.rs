@@ -4,7 +4,7 @@ use memory;
 
 pub fn load_std(lua: &mut hlua::Lua) {
     lua.openlibs(); // this is for testing, delete when not needed.
-    lua.set("peek", hlua::function1(|loc: i32| memory::peek(loc as usize)));
+    lua.set("peek", hlua::function1(|loc: i32|      memory::peek(loc as usize)));
     lua.set("poke", hlua::function2(|loc: i32, val| memory::poke(loc as usize, val)));
 }
 

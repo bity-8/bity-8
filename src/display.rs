@@ -1,34 +1,19 @@
 extern crate sdl2;
 
-use std::path::Path;
-use sdl2::event::Event;
-use sdl2::image::{LoadSurface, INIT_PNG, INIT_JPG};
-use sdl2::keyboard::Keycode;
-use sdl2::mouse::Cursor;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::surface::Surface;
+use self::sdl2::event::Event;
+use self::sdl2::keyboard::Keycode;
+use self::sdl2::pixels::Color;
+use self::sdl2::rect::Rect;
 
-pub fn run(png: &Path) {
+pub fn run() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let _image_context = sdl2::image::init(INIT_PNG | INIT_JPG).unwrap();
     let window = video_subsystem.window("rust-sdl2 demo: Cursor", 192*2, 144*2)
       .position_centered()
       .build()
       .unwrap();
 
     let mut canvas = window.into_canvas().software().build().unwrap();
-
-    let surface = match Surface::from_file(png) {
-        Ok(surface) => surface,
-        Err(err)    => panic!("failed to load cursor image: {}", err)
-    };
-    let cursor = match Cursor::from_surface(surface, 0, 0) {
-        Ok(cursor) => cursor,
-        Err(err) => panic!("failed to load cursor: {}", err)
-    };
-    cursor.set();
 
     canvas.clear();
     canvas.present();

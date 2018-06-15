@@ -1,18 +1,20 @@
 extern crate hlua;
 pub mod std;
 
+use self::hlua::Lua;
+use self::hlua::LuaError;
 use std::fs::File;
 use std::path::Path;
 use std::io::BufReader;
 
 // loads and evaluates the lua file.
-pub fn create_lua<'a>() -> hlua::Lua<'a> {
-    let mut lua = hlua::Lua::new();
+pub fn create_lua<'a>() -> Lua<'a> {
+    let mut lua = Lua::new();
     std::load_std(&mut lua);
     lua
 }
 
-pub fn load_file(file: &Path, lua: &mut hlua::Lua) {
+pub fn load_file(file: &Path, lua: &mut Lua) {
     // Create lua virtual machine.
     let f = File::open(file).expect("file not found");
 
@@ -25,27 +27,27 @@ pub fn load_file(file: &Path, lua: &mut hlua::Lua) {
 
     if let Err(e) = read_res {
         match e {
-            hlua::LuaError::SyntaxError(s) => eprintln!("Error: {:?}", s),
+            LuaError::SyntaxError(s) => eprintln!("Error: {:?}", s),
             _ => eprintln!("Error: {:?}", e)
         }
     }
 }
 
-pub fn call_fn(func_str: &str, mut lua: hlua::Lua) -> Result<(), String> {
+pub fn call_fn(func_str: &str, mut lua: Lua) -> Result<(), String> {
     match lua.execute::<()>(func_str) {
         Ok(_v) => Ok(_v),
         Err(_e) => Err(format!("Error: \'{}\' not found.", func_str)),
     }
 }
 
-pub fn call_init(lua: hlua::Lua) -> Result<(), String> {
+pub fn call_init(lua: Lua) -> Result<(), String> {
     call_fn("_init()", lua)
 }
 
-pub fn call_update(lua: hlua::Lua) -> Result<(), String> {
+pub fn call_update(lua: Lua) -> Result<(), String> {
     call_fn("_update()", lua)
 }
 
-pub fn call_draw(lua: hlua::Lua) -> Result<(), String> {
+pub fn call_draw(lua: Lua) -> Result<(), String> {
     call_fn("_draw()", lua)
 }

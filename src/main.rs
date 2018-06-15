@@ -1,6 +1,7 @@
 extern crate bity_8;
 
 use bity_8::lua;
+use bity_8::display;
 use std::env;
 use std::path::Path;
 
@@ -13,5 +14,7 @@ fn main() {
         let mut l = lua::create_lua();
         lua::load_file(Path::new(&args[1]), &mut l);
         l.execute::<()>("_init()").unwrap();
+
+        display::run();
     }
 }
