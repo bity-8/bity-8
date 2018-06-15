@@ -2,7 +2,6 @@ extern crate bity_8;
 
 use bity_8::lua;
 use bity_8::display;
-use bity_8::memory;
 use std::env;
 use std::path::Path;
 

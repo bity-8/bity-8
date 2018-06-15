@@ -10,11 +10,11 @@ use self::sdl2::render::WindowCanvas;
 use self::sdl2::keyboard::Keycode;
 use self::sdl2::pixels::Color;
 use self::sdl2::rect::Rect;
-use memory;
+use memory as mem;
 
 // TODO: make this function more pretty!
 pub fn draw_screen(canvas: &mut WindowCanvas) {
-    let mut pal = memory::get_sub_area(memory::LOC_HARD, memory::OFF_HARD_PAL);
+    let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
     let mut colors = [Color::RGB(0, 255, 0); 16];
 
     assert_eq!(pal.len(), 16*3);
@@ -23,7 +23,7 @@ pub fn draw_screen(canvas: &mut WindowCanvas) {
     }
 
     {
-        let screen = memory::get_area(memory::LOC_SCRE);
+        let screen = mem::get_area(mem::LOC_SCRE);
         let mut draw_func = |col, x, y| {
             canvas.set_draw_color(col);
             canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
@@ -33,7 +33,7 @@ pub fn draw_screen(canvas: &mut WindowCanvas) {
         for i in 0..screen.len() {
             let cols  = screen[i] as usize;
             let left  = (cols & 0xF0) >> 4;
-            let right = (cols & 0x0F);
+            let right = cols & 0x0F;
 
             let i = (i as i32) * 2;
             let x = i % SCR_X as i32;
@@ -74,6 +74,6 @@ pub fn run(l: &mut hlua::Lua) {
 
         canvas.clear();
         draw_screen(&mut canvas);
-        l.execute::<()>("_update()");
+        l.execute::<()>("_update()").unwrap();
     }
 }
