@@ -14,6 +14,6 @@ fn main() {
     } else {
         let mut l = lua::create_lua();
         lua::load_file(Path::new(&args[1]), &mut l);
-        display::run();
+        display::run(&mut l);
     }
 }

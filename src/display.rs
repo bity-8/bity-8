@@ -1,8 +1,9 @@
 extern crate sdl2;
+extern crate hlua;
 
 const SCR_X: u32 = 192;
 const SCR_Y: u32 = 144;
-const PIX_LEN: u32 = 4;
+const PIX_LEN: u32 = 4; // the size for each pixel.
 
 use self::sdl2::event::Event;
 use self::sdl2::render::WindowCanvas;
@@ -20,26 +21,32 @@ pub fn draw_screen(canvas: &mut WindowCanvas) {
         colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
     }
 
-    let screen = memory::get_scre();
+    {
+        let screen = memory::get_scre();
+        let mut draw_func = |col, x, y| {
+            canvas.set_draw_color(col);
+            canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
+        };
 
-    for i in 0..screen.len() {
-        let x: i32 = i as i32*2 % SCR_X as i32;
-        let y: i32 = i as i32*2 / SCR_X as i32;
-        let left:  usize = (screen[i] as usize & 0xF0) >> 4;
-        let right: usize = (screen[i] as usize & 0x0F);
+        // remember there are 2 pixels in each byte.
+        for i in 0..screen.len() {
+            let cols  = screen[i] as usize;
+            let left  = (cols & 0xF0) >> 4;
+            let right = (cols & 0x0F);
 
-        let col = colors[left];
-        canvas.set_draw_color(col);
-        canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
+            let i = (i as i32) * 2;
+            let x = i % SCR_X as i32;
+            let y = i / SCR_X as i32;
 
-        let x: i32 = x + 1;
-        let col = colors[right];
-        canvas.set_draw_color(col);
-        canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
+            draw_func(colors[left], x, y);
+            draw_func(colors[right], x+1, y);
+        }
     }
+
+    canvas.present();
 }
 
-pub fn run() {
+pub fn run(l: &mut hlua::Lua) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem.window("rust-sdl2 demo: Cursor", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
@@ -60,12 +67,12 @@ pub fn run() {
                 Event::Quit{..} |
                 Event::KeyDown {keycode: Option::Some(Keycode::Escape), ..} =>
                     break 'mainloop,
-                 Event::MouseButtonDown {x, y, ..} => {
-                     draw_screen(&mut canvas);
-                     canvas.present();
-                }
                 _ => {}
             }
         }
+
+        canvas.clear();
+        draw_screen(&mut canvas);
+        l.execute::<()>("_update()");
     }
 }

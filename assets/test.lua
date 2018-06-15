@@ -8,13 +8,6 @@ for k, v in pairs(colors) do
    poke(0x40000+k-1, v)
 end
 
--- set the screen.
-for i=0, 192 do
-   for j=0, 144 do
-      poke(0x40400 + j*192 + i, math.floor(math.random() * 0x100))
-   end
-end
-
 poke(2, 001)
 poke(8, 120)
 poke(10, 0x20)
@@ -24,5 +17,14 @@ for i=0, 200 do
    local val = peek(i)
    if val ~= 0 then
       print("val "..i.." is "..val)
+   end
+end
+
+function _update()
+   -- set the screen.
+   for i=0, 192 do
+      for j=0, 144 do
+         poke(0x40400 + j*192 + i, math.floor(math.random() * 0x100))
+      end
    end
 end

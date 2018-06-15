@@ -33,21 +33,9 @@ pub fn load_file(file: &Path, lua: &mut Lua) {
     }
 }
 
-pub fn call_fn(func_str: &str, mut lua: Lua) -> Result<(), String> {
+pub fn call_fn(func_str: &str, lua: &mut Lua) -> Result<(), String> {
     match lua.execute::<()>(func_str) {
         Ok(_v) => Ok(_v),
         Err(_e) => Err(format!("Error: \'{}\' not found.", func_str)),
     }
-}
-
-pub fn call_init(lua: Lua) -> Result<(), String> {
-    call_fn("_init()", lua)
-}
-
-pub fn call_update(lua: Lua) -> Result<(), String> {
-    call_fn("_update()", lua)
-}
-
-pub fn call_draw(lua: Lua) -> Result<(), String> {
-    call_fn("_draw()", lua)
 }
