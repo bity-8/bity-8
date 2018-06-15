@@ -2,7 +2,7 @@ extern crate sdl2;
 
 const SCR_X: u32 = 192;
 const SCR_Y: u32 = 144;
-const PIX_LEN: u32 = 2;
+const PIX_LEN: u32 = 4;
 
 use self::sdl2::event::Event;
 use self::sdl2::render::WindowCanvas;
@@ -11,6 +11,7 @@ use self::sdl2::pixels::Color;
 use self::sdl2::rect::Rect;
 use memory;
 
+// TODO: make this function more pretty!
 pub fn draw_screen(canvas: &mut WindowCanvas) {
     let mut pal = memory::get_hard_pal();
     let mut colors = [Color::RGB(0, 255, 0); 16];
