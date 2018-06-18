@@ -95,9 +95,8 @@ pub fn run(l: &mut hlua::Lua) {
 
         if 1_000_000_000u64 / fps > elapsed {
             let diff = 1_000_000_000u64 / fps - elapsed;
+            println!("elapsed: {}, sleep: {}", elapsed as f64 / 1_000_000_000f64, diff as f64 / 1_000_000_000f64);
             thread::sleep(Duration::from_nanos(diff));
-            println!("{}: elapsed, {}: fps", elapsed, diff);
-            println!("slept {}", diff);
         }
     }
 }
