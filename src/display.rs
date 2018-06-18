@@ -50,7 +50,7 @@ pub fn draw_screen(canvas: &mut WindowCanvas, mut texture: &mut Texture) {
 }
 
 pub fn run(l: &mut hlua::Lua) {
-    let fps = 30i64;
+    let fps = 25u64;
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -91,14 +91,13 @@ pub fn run(l: &mut hlua::Lua) {
 
         // ----- end measuring time...
         let elapsed = now.elapsed();
-        let elapsed = (elapsed.as_secs()*1_000) as i64 + (elapsed.subsec_nanos()/1_000_000) as i64;
-        let diff = 1_000i64 / fps - elapsed;
+        let elapsed = elapsed.as_secs() as u64 *1_000_000_000u64 + elapsed.subsec_nanos() as u64;
 
-        println!("{}: elapsed, {}: fps", elapsed, diff);
-
-        if diff > 0 {
-            thread::sleep(Duration::from_millis((fps-elapsed) as u64));
-            println!("slept");
+        if 1_000_000_000u64 / fps > elapsed {
+            let diff = 1_000_000_000u64 / fps - elapsed;
+            thread::sleep(Duration::from_nanos(diff));
+            println!("{}: elapsed, {}: fps", elapsed, diff);
+            println!("slept {}", diff);
         }
     }
 }
