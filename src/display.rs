@@ -17,12 +17,12 @@ use memory as mem;
 
 // Does the obvious, draws the screen to the canvas.
 // TODO: this is too slow.
+// This could be threaded maybe.
 pub fn draw_screen(canvas: &mut WindowCanvas, mut texture: &mut Texture) {
     canvas.with_texture_canvas(&mut texture, |tc| {
         let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
-        let mut colors = [Color::RGB(0, 255, 0); 16];
+        let mut colors = [Color::RGB(0, 0, 0); 16];
 
-        assert_eq!(pal.len(), 16*3);
         for i in 0..16 {
             colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
         }
@@ -50,6 +50,8 @@ pub fn draw_screen(canvas: &mut WindowCanvas, mut texture: &mut Texture) {
 }
 
 pub fn run(l: &mut hlua::Lua) {
+    let fps = 30i64;
+
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem.window("rust-sdl2 demo: Cursor", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
@@ -68,7 +70,9 @@ pub fn run(l: &mut hlua::Lua) {
     let mut events = sdl_context.event_pump().unwrap();
 
     'mainloop: loop {
-
+        // ----- start measuring time...
+        use std::time::Instant;
+        let now = Instant::now();
 
         for event in events.poll_iter() {
             match event {
@@ -81,18 +85,20 @@ pub fn run(l: &mut hlua::Lua) {
 
         l.execute::<()>("_update()").unwrap();
 
-        // ----- start measuring time...
-        use std::time::Instant;
-        let now = Instant::now();
         draw_screen(&mut canvas, &mut texture);
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
         // ----- end measuring time...
         let elapsed = now.elapsed();
-        let sec = (elapsed.as_secs() as f64) + (elapsed.subsec_nanos() as f64 / 1000_000_000.0);
+        let elapsed = (elapsed.as_secs()*1_000) as i64 + (elapsed.subsec_nanos()/1_000_000) as i64;
+        let diff = 1_000i64 / fps - elapsed;
 
-        println!("{} is the time in secs", sec);
-        thread::sleep(Duration::from_millis(1000));
+        println!("{}: elapsed, {}: fps", elapsed, diff);
+
+        if diff > 0 {
+            thread::sleep(Duration::from_millis((fps-elapsed) as u64));
+            println!("slept");
+        }
     }
 }
