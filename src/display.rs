@@ -3,30 +3,34 @@ extern crate hlua;
 
 const SCR_X: u32 = 192;
 const SCR_Y: u32 = 144;
-const PIX_LEN: u32 = 4; // the size for each pixel.
+const PIX_LEN: u32 = 2; // the size for each pixel.
 
+use std::time::Duration;
+use std::thread;
 use self::sdl2::event::Event;
 use self::sdl2::render::WindowCanvas;
 use self::sdl2::keyboard::Keycode;
 use self::sdl2::pixels::Color;
-use self::sdl2::rect::Rect;
+use self::sdl2::rect::Point;
+use self::sdl2::render::Texture;
 use memory as mem;
 
-// TODO: make this function more pretty!
-pub fn draw_screen(canvas: &mut WindowCanvas) {
-    let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
-    let mut colors = [Color::RGB(0, 255, 0); 16];
+// Does the obvious, draws the screen to the canvas.
+// TODO: this is too slow.
+pub fn draw_screen(canvas: &mut WindowCanvas, mut texture: &mut Texture) {
+    canvas.with_texture_canvas(&mut texture, |tc| {
+        let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
+        let mut colors = [Color::RGB(0, 255, 0); 16];
 
-    assert_eq!(pal.len(), 16*3);
-    for i in 0..16 {
-        colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
-    }
+        assert_eq!(pal.len(), 16*3);
+        for i in 0..16 {
+            colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
+        }
 
-    {
         let screen = mem::get_area(mem::LOC_SCRE);
         let mut draw_func = |col, x, y| {
-            canvas.set_draw_color(col);
-            canvas.fill_rect(Rect::new(x*PIX_LEN as i32, y*PIX_LEN as i32, PIX_LEN, PIX_LEN)).unwrap();
+            tc.set_draw_color(col);
+            tc.draw_point(Point::new(x as i32, y as i32)).unwrap();
         };
 
         // remember there are 2 pixels in each byte.
@@ -42,38 +46,53 @@ pub fn draw_screen(canvas: &mut WindowCanvas) {
             draw_func(colors[left], x, y);
             draw_func(colors[right], x+1, y);
         }
-    }
-
-    canvas.present();
+    }).unwrap();
 }
 
 pub fn run(l: &mut hlua::Lua) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem.window("rust-sdl2 demo: Cursor", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
-      .position_centered()
-      .build()
-      .unwrap();
+        .position_centered()
+        .build()
+        .unwrap();
 
-    let mut canvas = window.into_canvas().software().build().unwrap();
+    let mut canvas = window.into_canvas()
+        .target_texture() .software() .build() .unwrap();
 
-    canvas.clear();
-    canvas.present();
+    let texture_creator = canvas.texture_creator();
+    let mut texture = texture_creator
+        .create_texture_target(texture_creator.default_pixel_format(), SCR_X, SCR_Y)
+        .unwrap();
 
     let mut events = sdl_context.event_pump().unwrap();
 
     'mainloop: loop {
+
+
         for event in events.poll_iter() {
             match event {
-                Event::Quit{..} |
-                Event::KeyDown {keycode: Option::Some(Keycode::Escape), ..} =>
-                    break 'mainloop,
+                Event::Quit{..} | Event::KeyDown {
+                    keycode: Option::Some(Keycode::Escape), ..
+                } => break 'mainloop,
                 _ => {}
             }
         }
 
-        canvas.clear();
-        draw_screen(&mut canvas);
         l.execute::<()>("_update()").unwrap();
+
+        // ----- start measuring time...
+        use std::time::Instant;
+        let now = Instant::now();
+        draw_screen(&mut canvas, &mut texture);
+        canvas.copy(&texture, None, None).unwrap();
+        canvas.present();
+
+        // ----- end measuring time...
+        let elapsed = now.elapsed();
+        let sec = (elapsed.as_secs() as f64) + (elapsed.subsec_nanos() as f64 / 1000_000_000.0);
+
+        println!("{} is the time in secs", sec);
+        thread::sleep(Duration::from_millis(1000));
     }
 }
