@@ -8,50 +8,48 @@ const PIX_LEN: u32 = 2; // the size for each pixel.
 use std::time::Duration;
 use std::thread;
 use self::sdl2::event::Event;
-use self::sdl2::render::WindowCanvas;
 use self::sdl2::keyboard::Keycode;
 use self::sdl2::pixels::Color;
-use self::sdl2::rect::Point;
 use self::sdl2::render::Texture;
 use memory as mem;
 
 // Does the obvious, draws the screen to the canvas.
 // TODO: this is too slow.
 // This could be threaded maybe.
-pub fn draw_screen(canvas: &mut WindowCanvas, mut texture: &mut Texture) {
-    canvas.with_texture_canvas(&mut texture, |tc| {
-        let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
-        let mut colors = [Color::RGB(0, 0, 0); 16];
+pub fn draw_screen(texture: &mut Texture) {
+    let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
+    let mut colors = [Color::RGB(0, 0, 0); 16];
 
-        for i in 0..16 {
-            colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
-        }
+    for i in 0..16 {
+        colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
+    }
 
-        let screen = mem::get_area(mem::LOC_SCRE);
-        let mut draw_func = |col, x, y| {
-            tc.set_draw_color(col);
-            tc.draw_point(Point::new(x as i32, y as i32)).unwrap();
-        };
+    let screen = mem::get_area(mem::LOC_SCRE);
 
+    texture.with_lock(None, |arr, _row_w| {
         // remember there are 2 pixels in each byte.
         for i in 0..screen.len() {
             let cols  = screen[i] as usize;
             let left  = (cols & 0xF0) >> 4;
             let right = cols & 0x0F;
+            let i = (i * 8) as usize;
 
-            let i = (i as i32) * 2;
-            let x = i % SCR_X as i32;
-            let y = i / SCR_X as i32;
+            // left
+            arr[i + 0usize] = colors[left].rgba().2;
+            arr[i + 1usize] = colors[left].rgba().1;
+            arr[i + 2usize] = colors[left].rgba().0;
 
-            draw_func(colors[left], x, y);
-            draw_func(colors[right], x+1, y);
+            // right
+            arr[i + 4usize] = colors[right].rgba().2;
+            arr[i + 5usize] = colors[right].rgba().1;
+            arr[i + 6usize] = colors[right].rgba().0;
         }
     }).unwrap();
 }
 
 pub fn run(l: &mut hlua::Lua) {
     // Measured in nano seconds.
-    let fps = Duration::from_secs(1).checked_div(25).unwrap();
+    let fps = Duration::from_secs(1).checked_div(60).unwrap();
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -65,7 +63,7 @@ pub fn run(l: &mut hlua::Lua) {
 
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator
-        .create_texture_target(texture_creator.default_pixel_format(), SCR_X, SCR_Y)
+        .create_texture_streaming(texture_creator.default_pixel_format(), SCR_X, SCR_Y)
         .unwrap();
 
     let mut events = sdl_context.event_pump().unwrap();
@@ -86,7 +84,7 @@ pub fn run(l: &mut hlua::Lua) {
 
         l.execute::<()>("_update()").unwrap();
 
-        draw_screen(&mut canvas, &mut texture);
+        draw_screen(&mut texture);
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
@@ -98,6 +96,8 @@ pub fn run(l: &mut hlua::Lua) {
             let diff = fps.checked_sub(elapsed).unwrap();
             println!("elapsed: {}, sleep: {}", elapsed.subsec_nanos(), diff.subsec_nanos());
             thread::sleep(diff);
+        } else {
+            println!("--- too slow, elapsed: {}", elapsed.subsec_nanos());
         }
     }
 }
