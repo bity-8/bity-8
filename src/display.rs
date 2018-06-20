@@ -94,10 +94,8 @@ pub fn run(l: &mut hlua::Lua) {
 
         if fps > elapsed {
             let diff = fps.checked_sub(elapsed).unwrap();
-            println!("elapsed: {}, sleep: {}", elapsed.subsec_nanos(), diff.subsec_nanos());
+            // println!("elapsed: {}, sleep: {}", elapsed.subsec_nanos(), diff.subsec_nanos());
             thread::sleep(diff);
-        } else {
-            println!("--- too slow, elapsed: {}", elapsed.subsec_nanos());
         }
     }
 }
