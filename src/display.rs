@@ -59,7 +59,11 @@ pub fn run(l: &mut hlua::Lua) {
         .unwrap();
 
     let mut canvas = window.into_canvas()
-        .target_texture() .software() .build() .unwrap();
+        .target_texture()
+        .present_vsync()
+        .build() .unwrap();
+
+    println!("Using SDL_Renderer \"{}\"", canvas.info().name);
 
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator
