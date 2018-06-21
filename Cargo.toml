@@ -8,6 +8,13 @@ authors = [
 ]
 publish = false
 
+[lib]
+name = "bity_8"
+path = "src/engine/lib.rs"
+
+[[bin]]
+name = "bity-8"
+
 [dependencies]
 hlua = "0.3"
 
