@@ -7,28 +7,22 @@ const PIX_LEN: u32 = 2; // the size for each pixel.
 
 use std::time::Duration;
 use std::thread;
+use std::collections::HashSet;
 use self::sdl2::event::Event;
 use self::sdl2::keyboard::Keycode;
 use self::sdl2::pixels::Color;
-use self::sdl2::pixels::PixelFormatEnum;
 use self::sdl2::render::Texture;
-use self::sdl2::sys::{SDL_BYTEORDER, SDL_LIL_ENDIAN};
 use memory as mem;
 
 // Does the obvious, draws the screen to the canvas.
+// TODO: this is too slow.
 // This could be threaded maybe.
 pub fn draw_screen(texture: &mut Texture) {
     let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
     let mut colors = [Color::RGB(0, 0, 0); 16];
 
     for i in 0..16 {
-        let (col1, col2, col3) = (pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8);
-
-        if SDL_BYTEORDER == SDL_LIL_ENDIAN {
-            colors[i] = Color::RGB(col3, col2, col1);
-        } else {
-            colors[i] = Color::RGB(col1, col2, col3);
-        }
+        colors[i] = Color::RGB(pal[i*3] as u8, pal[i*3+1] as u8, pal[i*3+2] as u8)
     }
 
     let screen = mem::get_area(mem::LOC_SCRE);
@@ -42,14 +36,14 @@ pub fn draw_screen(texture: &mut Texture) {
             let i = (i * 8) as usize;
 
             // left
-            arr[i + 0usize] = colors[left].r;
-            arr[i + 1usize] = colors[left].g;
-            arr[i + 2usize] = colors[left].b;
+            arr[i + 0usize] = colors[left].rgba().2;
+            arr[i + 1usize] = colors[left].rgba().1;
+            arr[i + 2usize] = colors[left].rgba().0;
 
             // right
-            arr[i + 4usize] = colors[right].r;
-            arr[i + 5usize] = colors[right].g;
-            arr[i + 6usize] = colors[right].b;
+            arr[i + 4usize] = colors[right].rgba().2;
+            arr[i + 5usize] = colors[right].rgba().1;
+            arr[i + 6usize] = colors[right].rgba().0;
         }
     }).unwrap();
 }
@@ -70,12 +64,16 @@ pub fn run(l: &mut hlua::Lua) {
         .present_vsync()
         .build() .unwrap();
 
+    println!("Using SDL_Renderer \"{}\"", canvas.info().name);
+
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator
-        .create_texture_streaming(PixelFormatEnum::RGB888, SCR_X, SCR_Y)
+        .create_texture_streaming(texture_creator.default_pixel_format(), SCR_X, SCR_Y)
         .unwrap();
 
     let mut events = sdl_context.event_pump().unwrap();
+
+    let mut prev_keys = HashSet::new();
 
     'mainloop: loop {
         // ----- start measuring time...
@@ -90,6 +88,49 @@ pub fn run(l: &mut hlua::Lua) {
                 _ => {}
             }
         }
+
+        // Create a set of pressed Keys.
+        let keys = events.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
+
+        // Get the difference between the new and old sets.
+        let new_keys = &keys - &prev_keys;
+        let old_keys = &prev_keys - &keys;
+
+        if !new_keys.is_empty() || !old_keys.is_empty() {
+            //println!("new_keys: {:?}\told_keys:{:?}", new_keys, old_keys);
+        }
+
+        for key in new_keys {
+            match key {
+                Keycode::Up => {
+                    println!("Up pressed");
+                },
+                Keycode::Down => {
+                    println!("Down pressed");
+                },
+                Keycode::Left => {
+                    println!("Left pressed");
+                },
+                Keycode::Right => {
+                    println!("Right pressed");
+                },
+                Keycode::Z => {
+                    println!("A pressed");
+                },
+                Keycode::X => {
+                    println!("B pressed");
+                },
+                Keycode::Backspace => {
+                    println!("Select pressed");
+                },
+                Keycode::Return => {
+                    println!("Start pressed");
+                },
+                _ => {}
+            }
+        }
+
+        prev_keys = keys;
 
         l.execute::<()>("_update()").unwrap();
 
