@@ -13,9 +13,16 @@ pub const LOC_HARD: MemLoc = (0x40000..0x40400); // Hardware Config
 pub const LOC_SCRE: MemLoc = (0x40400..0x43A00); // Screen Buffer
 pub const LOC_SPRI: MemLoc = (0x43A00..0x47000); // Sprite Sheets
 pub const LOC_TILE: MemLoc = (0x47000..0x4DC00); // Tile Maps
-pub const LOC_SAVE: MemLoc = (0x4DC00..0x4E000); // Save
-pub const LOC_EMPT: MemLoc = (0x4E000..0x4F800); // Empty
+pub const LOC_INST: MemLoc = (0x4DC00..0x4E000); // Instruments
+pub const LOC_SAVE: MemLoc = (0x4E000..0x4E400); // Save
+pub const LOC_EMPT: MemLoc = (0x4E400..0x4F800); // Empty
 pub const LOC_MULT: MemLoc = (0x4F800..0x50000); // Multicart
+
+// Instrument Locations
+pub const LOC_INS1: MemLoc = (0x4DC00..0x4DC80); // Multicart
+pub const LOC_INS2: MemLoc = (0x4DC80..0x4DD00); // Multicart
+pub const LOC_INS3: MemLoc = (0x4DD00..0x4DD80); // Multicart
+pub const LOC_INS4: MemLoc = (0x4DD80..0x4DE00); // Multicart
 
 pub const LOC_ALL:        MemLoc = (0x00000..0x50000);
 pub const LOC_REBOOTABLE: MemLoc = (0x00000..0x4F800); // Memory that gets reset
@@ -55,7 +62,7 @@ pub fn get_sub_area(area: MemLoc, off: MemLoc) -> &'static mut [i8] {
 }
 
 // Maps a vector to memory. This is safe if you mess up the parameters.
-pub fn map_vector( start: usize, len: usize, vec: &[i8]) {
+pub fn map_vector(start: usize, len: usize, vec: &[i8]) {
     let len = cmp::min(vec.len(), len);
 
     for vec_ind in 0..len {
@@ -112,6 +119,14 @@ pub fn poke_a(pos: usize, val: i8)  { poke(pos, val, LOC_ALL); }
 pub fn mset_a(pos: usize, len: usize, val: i8) { mset(pos, len, val, LOC_ALL); }
 pub fn mcpy_a(dest: usize, pos: usize, len: usize) { mcpy(dest, pos, len, LOC_ALL); }
 
+pub fn reset_memory() {
+    mset_a(0, CART_LEN, 0);
+    map_vector(LOC_INS1.start, 128, &SQUARE_WAVE);
+    map_vector(LOC_INS2.start, 128, &SAWTOOTH_WAVE);
+    map_vector(LOC_INS3.start, 128, &TRIANGLE_WAVE);
+    map_vector(LOC_INS4.start, 128, &NOISE_WAVE);
+}
+
 #[test]
 fn test_mem() {
     mset_a(0, CART_LEN, 0);
@@ -138,3 +153,57 @@ fn test_mem() {
         assert_eq!(peek(i), 0);
     }
 }
+
+// Some defaults:
+const INSTRUMENT_LEN:   usize = 128;
+pub type Instrument = [i8; INSTRUMENT_LEN];
+
+// used python to generate these :).
+pub const SQUARE_WAVE: [i8; INSTRUMENT_LEN] =
+[
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+];
+
+// [(i - math.floor(i * 1/2) ) * 4 - 128 for i in range(128)]
+pub const SAWTOOTH_WAVE: [i8; INSTRUMENT_LEN] =
+[
+    -127, -124, -124, -120, -120, -116, -116, -112, -112, -108, -108, -104, -104, -100, -100, -96,
+    -96, -92, -92, -88, -88, -84, -84, -80, -80, -76, -76, -72, -72, -68, -68, -64, -64, -60, -60,
+    -56, -56, -52, -52, -48, -48, -44, -44, -40, -40, -36, -36, -32, -32, -28, -28, -24, -24, -20,
+    -20, -16, -16, -12, -12, -8, -8, -4, -4, 0, 0, 4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28,
+    28, 32, 32, 36, 36, 40, 40, 44, 44, 48, 48, 52, 52, 56, 56, 60, 60, 64, 64, 68, 68, 72, 72, 76,
+    76, 80, 80, 84, 84, 88, 88, 92, 92, 96, 96, 100, 100, 104, 104, 108, 108, 112, 112, 116, 116,
+    120, 120, 124, 124, 127
+];
+
+// [abs((i - math.floor(i * 1/2) ) * 4 - 128) * 2 - 128 for i in range(128)]
+pub const TRIANGLE_WAVE: [i8; INSTRUMENT_LEN] =
+[
+    127, 120, 120, 112, 112, 104, 104, 96, 96, 88, 88, 80, 80, 72, 72, 64, 64, 56, 56, 48, 48, 40,
+    40, 32, 32, 24, 24, 16, 16, 8, 8, 0, 0, -8, -8, -16, -16, -24, -24, -32, -32, -40, -40, -48,
+    -48, -56, -56, -64, -64, -72, -72, -80, -80, -88, -88, -96, -96, -104, -104, -112, -112, -120,
+    -120, -127, -127, -120, -120, -112, -112, -104, -104, -96, -96, -88, -88, -80, -80, -72, -72,
+    -64, -64, -56, -56, -48, -48, -40, -40, -32, -32, -24, -24, -16, -16, -8, -8, 0, 0, 8, 8, 16,
+    16, 24, 24, 32, 32, 40, 40, 48, 48, 56, 56, 64, 64, 72, 72, 80, 80, 88, 88, 96, 96, 104, 104,
+    112, 112, 120, 120, 127
+];
+
+pub const NOISE_WAVE: [i8; INSTRUMENT_LEN] =
+[
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+];
+

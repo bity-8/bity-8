@@ -3,7 +3,8 @@ extern crate bity_8;
 use bity_8::lua;
 use bity_8::sdl2;
 use bity_8::display;
-use bity_8::audio;
+//use bity_8::audio;
+use bity_8::memory as mem;
 use std::env;
 use std::path::Path;
 
@@ -16,6 +17,7 @@ fn main() {
         let mut l = lua::create_lua();
         let mut sdl_context = sdl2::init().unwrap();
 
+        mem::reset_memory();
         lua::load_file(Path::new(&args[1]), &mut l);
         // audio::run(&mut sdl_context);
         display::run(&mut l, &mut sdl_context);
