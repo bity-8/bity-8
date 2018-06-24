@@ -1,7 +1,9 @@
 extern crate bity_8;
 
 use bity_8::lua;
+use bity_8::sdl2;
 use bity_8::display;
+use bity_8::audio;
 use std::env;
 use std::path::Path;
 
@@ -12,7 +14,10 @@ fn main() {
         println!("Usage: cargo run /path/to/file.lua")
     } else {
         let mut l = lua::create_lua();
+        let mut sdl_context = sdl2::init().unwrap();
+
         lua::load_file(Path::new(&args[1]), &mut l);
-        display::run(&mut l);
+        audio::run(&mut sdl_context);
+        // display::run(&mut l, &mut sdl_context);
     }
 }

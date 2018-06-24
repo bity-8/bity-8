@@ -1,4 +1,3 @@
-extern crate sdl2;
 extern crate hlua;
 
 const SCR_X: u32 = 192;
@@ -7,12 +6,13 @@ const PIX_LEN: u32 = 2; // the size for each pixel.
 
 use std::time::Duration;
 use std::thread;
-use self::sdl2::event::Event;
-use self::sdl2::keyboard::Keycode;
-use self::sdl2::pixels::Color;
-use self::sdl2::pixels::PixelFormatEnum;
-use self::sdl2::render::Texture;
-use self::sdl2::sys::{SDL_BYTEORDER, SDL_LIL_ENDIAN};
+use sdl2::Sdl;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::render::Texture;
+use sdl2::sys::{SDL_BYTEORDER, SDL_LIL_ENDIAN};
 use memory as mem;
 
 // Does the obvious, draws the screen to the canvas.
@@ -54,11 +54,9 @@ pub fn draw_screen(texture: &mut Texture) {
     }).unwrap();
 }
 
-pub fn run(l: &mut hlua::Lua) {
+pub fn run(l: &mut hlua::Lua, sdl_context: &mut Sdl) {
     // Measured in nano seconds.
     let fps = Duration::from_secs(1).checked_div(60).unwrap();
-
-    let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem.window("rust-sdl2 demo: Cursor", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
         .position_centered()

@@ -1,54 +1,135 @@
-// so far this is just a demo
 extern crate sdl2;
 
-use sdl2::audio::{AudioCallback, AudioSpecDesired};
+use std;
+use sdl2::audio::AudioSpecDesired;
 use std::time::Duration;
+use self::sdl2::Sdl;
 
-struct SquareWave {
-    phase_inc: f32,
-    phase: f32,
-    volume: f32
-}
+const CHANNELS:  u32 = 1;
+const LENGTH:    u32 = 1_000 / 60;
+const SAMPLES:   u32 = 4096;
+const SPS:       u32 = 60;
+const PIANO_LEN: usize = 88;
+const EM_SIZE:   usize = 128;
 
-impl AudioCallback for SquareWave {
-    type Channel = f32;
+// Piano frequencies taken from here: A0 - C8
+// http://www.sengpielaudio.com/calculator-notenames.htm
+const PIANO_FREQS: [f32; PIANO_LEN] = 
+[27.5000, 29.1353, 30.8677, 32.7032, 34.6479, 36.7081, 38.8909, 41.2035, 43.6536, 46.2493, 48.9995, 51.9130,
+ 55.0000, 58.2705, 61.7354, 65.4064, 69.2957, 73.4162, 77.7817, 82.4069, 87.3071, 92.4986, 97.9989, 103.826,
+ 110.000, 116.541, 123.471, 130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.998, 207.652,
+ 220.000, 233.082, 246.942, 261.626, 277.183, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305,
+ 440.000, 466.164, 493.883, 523.251, 554.365, 587.330, 622.254, 659.255, 698.456, 739.989, 783.991, 830.609,
+ 880.000, 932.328, 987.767, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91, 1479.98, 1567.98, 1661.22,
+ 1760.00, 1864.66, 1975.53, 2093.00, 2217.46, 2349.32, 2489.02, 2637.02, 2793.83, 2959.96, 3135.96, 3322.44,
+ 3520.00, 3729.31, 3951.07, 4186.01];
 
-    fn callback(&mut self, out: &mut [f32]) {
-        // Generate a square wave
-        for x in out.iter_mut() {
-            *x = if self.phase <= 0.5 { self.volume } else { -self.volume };
-            self.phase = (self.phase + self.phase_inc) % 1.0;
+const PIANO_FREQS_INT: [u32; PIANO_LEN] =
+[  28,   29,   31,   33,   35,   37,   39,   41,   44,   46,   49,   52,
+   55,   58,   62,   65,   69,   73,   78,   82,   87,   92,   98,  104,
+  110,  117,  123,  131,  139,  147,  156,  165,  175,  185,  196,  208,
+  220,  233,  247,  262,  277,  294,  311,  330,  349,  370,  392,  415,
+  440,  466,  494,  523,  554,  587,  622,  659,  698,  740,  784,  831,
+  880,  932,  988, 1046, 1109, 1175, 1245, 1319, 1397, 1480, 1568, 1661,
+ 1760, 1865, 1976, 2093, 2217, 2349, 2489, 2637, 2794, 2960, 3136, 3322,
+ 3520, 3729, 3951, 4186];
+
+// used python to generate these :).
+const SQUARE_WAVE: [i8; EM_SIZE] =
+[
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,  127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+    -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127, -127,
+];
+
+// [(i - math.floor(i * 1/2) ) * 4 - 128 for i in range(128)]
+const SAWTOOTH_WAVE: [i8; EM_SIZE] =
+[
+    -127, -124, -124, -120, -120, -116, -116, -112, -112, -108, -108, -104, -104, -100, -100, -96,
+    -96, -92, -92, -88, -88, -84, -84, -80, -80, -76, -76, -72, -72, -68, -68, -64, -64, -60, -60,
+    -56, -56, -52, -52, -48, -48, -44, -44, -40, -40, -36, -36, -32, -32, -28, -28, -24, -24, -20,
+    -20, -16, -16, -12, -12, -8, -8, -4, -4, 0, 0, 4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28,
+    28, 32, 32, 36, 36, 40, 40, 44, 44, 48, 48, 52, 52, 56, 56, 60, 60, 64, 64, 68, 68, 72, 72, 76,
+    76, 80, 80, 84, 84, 88, 88, 92, 92, 96, 96, 100, 100, 104, 104, 108, 108, 112, 112, 116, 116,
+    120, 120, 124, 124, 127
+];
+
+// [abs((i - math.floor(i * 1/2) ) * 4 - 128) * 2 - 128 for i in range(128)]
+const TRIANGLE_WAVE: [i8; EM_SIZE] =
+[
+    127, 120, 120, 112, 112, 104, 104, 96, 96, 88, 88, 80, 80, 72, 72, 64, 64, 56, 56, 48, 48, 40,
+    40, 32, 32, 24, 24, 16, 16, 8, 8, 0, 0, -8, -8, -16, -16, -24, -24, -32, -32, -40, -40, -48,
+    -48, -56, -56, -64, -64, -72, -72, -80, -80, -88, -88, -96, -96, -104, -104, -112, -112, -120,
+    -120, -127, -127, -120, -120, -112, -112, -104, -104, -96, -96, -88, -88, -80, -80, -72, -72,
+    -64, -64, -56, -56, -48, -48, -40, -40, -32, -32, -24, -24, -16, -16, -8, -8, 0, 0, 8, 8, 16,
+    16, 24, 24, 32, 32, 40, 40, 48, 48, 56, 56, 64, 64, 72, 72, 80, 80, 88, 88, 96, 96, 104, 104,
+    112, 112, 120, 120, 127
+];
+
+// random.seed(12818)
+// [math.floor(random.random() * 256) - 128 for i in range(128)] 
+const NOISE_WAVE: [i8; EM_SIZE] =
+[
+    97, -5, 71, 65, 25, -2, -10, 25, -42, -104, -21, 123, 79, -6, 51, 64, 104, 121, 40, -6, -114,
+    -85, -118, 96, -17, 96, -75, 112, -40, -111, -67, 126, -24, 127, 90, -22, 39, -13, 30, 43,
+    -106, 42, 64, 3, 2, 116, -80, -8, -101, -60, 112, 123, 85, 115, 99, -114, -62, 20, 85, 51,
+    -125, 57, 34, -97, -78, -39, 48, -22, 58, -80, 104, -38, 108, 83, 11, 86, 36, 51, -122, -116,
+    86, 53, -86, 54, -21, 6, 13, -21, -64, -30, 29, 70, 0, -86, 87, -48, 44, -122, 104, -11, 59,
+    -102, -126, -115, 114, 67, -97, -77, 68, 84, 68, 119, -85, 124, 94, 12, -121, 96, 5, 97, 117,
+    22, 101, -74, 125, 66, -63, -71
+];
+
+fn gen_wave(note: usize, wave_data: [i8; EM_SIZE]) -> Vec<i16> {
+    let bytes_to_write = SPS * SAMPLES * LENGTH / 1_000;
+    let tone_volume = 1_000i16;
+    let period = (SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN];
+    let sample_count = bytes_to_write;
+    let mut result = Vec::new();
+
+    for x in 0..sample_count {
+        let ind = (x as f32 % period as f32 / period as f32 * 128f32) as usize;
+        let amp = wave_data[ind] as i16;
+        // let amp = if amp == -128 { 
+        if amp == -128 {
+            result.push(wave_data[ind] as i16 * 10);
         }
     }
+
+    result
 }
 
-fn main() {
-    let sdl_context = sdl2::init().unwrap();
+pub fn run(sdl_context: &mut Sdl) {
     let audio_subsystem = sdl_context.audio().unwrap();
 
     let desired_spec = AudioSpecDesired {
-        freq: Some(44_100),
-        channels: Some(1),  // mono
-        samples: None       // default sample size
+        freq: Some((SPS * SAMPLES) as i32), // 128 * 60 = 7_680
+        channels: Some(CHANNELS as u8),
+        // mono  -
+        samples: Some(SAMPLES as u16)
+        // default sample size
+        };
+
+    let device = audio_subsystem.open_queue::<i16, _>(None, &desired_spec).unwrap();
+
+    println!("{:?}", device.spec());
+
+    let wave_scale = |w| {
+        for i in 0..87 {
+            let wave = gen_wave(50, w);
+            device.queue(&wave); device.resume();
+        }
+        std::thread::sleep(Duration::from_millis(LENGTH as u64 * PIANO_LEN as u64));
     };
 
-    let device = audio_subsystem.open_playback(None, &desired_spec, |spec| {
-        // Show obtained AudioSpec
-        println!("{:?}", spec);
-
-        // initialize the audio callback
-        SquareWave {
-            phase_inc: 440.0 / spec.freq as f32,
-            phase: 0.0,
-            volume: 0.25
-        }
-    }).unwrap();
-
-    // Start playback
-    device.resume();
-
-    // Play for 2 seconds
-    std::thread::sleep(Duration::from_millis(2_000));
+    wave_scale(NOISE_WAVE);
+    wave_scale(TRIANGLE_WAVE);
+    wave_scale(SAWTOOTH_WAVE);
+    wave_scale(SQUARE_WAVE);
 
     // Device is automatically closed when dropped
 }
