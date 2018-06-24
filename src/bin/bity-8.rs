@@ -17,7 +17,7 @@ fn main() {
         let mut sdl_context = sdl2::init().unwrap();
 
         lua::load_file(Path::new(&args[1]), &mut l);
-        audio::run(&mut sdl_context);
-        // display::run(&mut l, &mut sdl_context);
+        // audio::run(&mut sdl_context);
+        display::run(&mut l, &mut sdl_context);
     }
 }

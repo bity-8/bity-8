@@ -1,4 +1,6 @@
 extern crate sdl2;
+extern crate rand;
+use audio::rand::prelude::*;
 
 use std;
 use sdl2::audio::AudioSpecDesired;
@@ -6,24 +8,16 @@ use std::time::Duration;
 use self::sdl2::Sdl;
 
 const CHANNELS:  u32 = 1;
-const LENGTH:    u32 = 1_000 / 60;
-const SAMPLES:   u32 = 4096;
+const LENGTH:    u32 = 1_000 / 3;
+const SAMPLES:   u32 = 1024;
 const SPS:       u32 = 60;
 const PIANO_LEN: usize = 88;
 const EM_SIZE:   usize = 128;
+const AMPLIFIER: i16 = 10;
 
 // Piano frequencies taken from here: A0 - C8
 // http://www.sengpielaudio.com/calculator-notenames.htm
-const PIANO_FREQS: [f32; PIANO_LEN] = 
-[27.5000, 29.1353, 30.8677, 32.7032, 34.6479, 36.7081, 38.8909, 41.2035, 43.6536, 46.2493, 48.9995, 51.9130,
- 55.0000, 58.2705, 61.7354, 65.4064, 69.2957, 73.4162, 77.7817, 82.4069, 87.3071, 92.4986, 97.9989, 103.826,
- 110.000, 116.541, 123.471, 130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.998, 207.652,
- 220.000, 233.082, 246.942, 261.626, 277.183, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305,
- 440.000, 466.164, 493.883, 523.251, 554.365, 587.330, 622.254, 659.255, 698.456, 739.989, 783.991, 830.609,
- 880.000, 932.328, 987.767, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91, 1479.98, 1567.98, 1661.22,
- 1760.00, 1864.66, 1975.53, 2093.00, 2217.46, 2349.32, 2489.02, 2637.02, 2793.83, 2959.96, 3135.96, 3322.44,
- 3520.00, 3729.31, 3951.07, 4186.01];
-
+// Then rounded (with round)
 const PIANO_FREQS_INT: [u32; PIANO_LEN] =
 [  28,   29,   31,   33,   35,   37,   39,   41,   44,   46,   49,   52,
    55,   58,   62,   65,   69,   73,   78,   82,   87,   92,   98,  104,
@@ -71,33 +65,33 @@ const TRIANGLE_WAVE: [i8; EM_SIZE] =
     112, 112, 120, 120, 127
 ];
 
-// random.seed(12818)
-// [math.floor(random.random() * 256) - 128 for i in range(128)] 
 const NOISE_WAVE: [i8; EM_SIZE] =
 [
-    97, -5, 71, 65, 25, -2, -10, 25, -42, -104, -21, 123, 79, -6, 51, 64, 104, 121, 40, -6, -114,
-    -85, -118, 96, -17, 96, -75, 112, -40, -111, -67, 126, -24, 127, 90, -22, 39, -13, 30, 43,
-    -106, 42, 64, 3, 2, 116, -80, -8, -101, -60, 112, 123, 85, 115, 99, -114, -62, 20, 85, 51,
-    -125, 57, 34, -97, -78, -39, 48, -22, 58, -80, 104, -38, 108, 83, 11, 86, 36, 51, -122, -116,
-    86, 53, -86, 54, -21, 6, 13, -21, -64, -30, 29, 70, 0, -86, 87, -48, 44, -122, 104, -11, 59,
-    -102, -126, -115, 114, 67, -97, -77, 68, 84, 68, 119, -85, 124, 94, 12, -121, 96, 5, 97, 117,
-    22, 101, -74, 125, 66, -63, -71
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+    -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
 ];
 
 fn gen_wave(note: usize, wave_data: [i8; EM_SIZE]) -> Vec<i16> {
     let bytes_to_write = SPS * SAMPLES * LENGTH / 1_000;
-    let tone_volume = 1_000i16;
     let period = (SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN];
     let sample_count = bytes_to_write;
     let mut result = Vec::new();
 
     for x in 0..sample_count {
         let ind = (x as f32 % period as f32 / period as f32 * 128f32) as usize;
-        let amp = wave_data[ind] as i16;
-        // let amp = if amp == -128 { 
-        if amp == -128 {
-            result.push(wave_data[ind] as i16 * 10);
-        }
+        let amp = wave_data[ind];
+        let amp = if amp == -128 {
+            let r: i8 = random();
+            if r == -128 { -127 } else { r }
+        } else { amp };
+
+        result.push(amp as i16 * AMPLIFIER);
     }
 
     result
@@ -120,16 +114,16 @@ pub fn run(sdl_context: &mut Sdl) {
 
     let wave_scale = |w| {
         for i in 0..87 {
-            let wave = gen_wave(50, w);
+            let wave = gen_wave(i, w);
             device.queue(&wave); device.resume();
         }
         std::thread::sleep(Duration::from_millis(LENGTH as u64 * PIANO_LEN as u64));
     };
 
-    wave_scale(NOISE_WAVE);
-    wave_scale(TRIANGLE_WAVE);
-    wave_scale(SAWTOOTH_WAVE);
     wave_scale(SQUARE_WAVE);
+    wave_scale(TRIANGLE_WAVE);
+    wave_scale(NOISE_WAVE);
+    wave_scale(SAWTOOTH_WAVE);
 
     // Device is automatically closed when dropped
 }

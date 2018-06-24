@@ -17,6 +17,7 @@ name = "bity-8"
 
 [dependencies]
 hlua = "0.3"
+rand = "0.5"
 
 [dependencies.sdl2]
 version = "0.31"
