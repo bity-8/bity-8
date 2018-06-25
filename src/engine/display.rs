@@ -5,6 +5,15 @@ const SCR_X: u32 = 192;
 const SCR_Y: u32 = 144;
 const PIX_LEN: u32 = 2; // the size for each pixel.
 
+const UP_BTN: i8 = 1;
+const DOWN_BTN: i8 = 2;
+const LEFT_BTN: i8 = 4;
+const RIGHT_BTN: i8 = 8;
+const A_BTN: i8 = 16;
+const B_BTN: i8 = 32;
+const START_BTN: i8 = 64;
+const SELECT_BTN: i8 = -128;
+
 use std::time::Duration;
 use std::thread;
 use std::collections::HashSet;
@@ -75,6 +84,8 @@ pub fn run(l: &mut hlua::Lua) {
 
     let mut prev_keys = HashSet::new();
 
+    //mem::get_area(mem::LOC_HARD)[0] = 0;
+
     'mainloop: loop {
         // ----- start measuring time...
         use std::time::Instant;
@@ -97,39 +108,72 @@ pub fn run(l: &mut hlua::Lua) {
         let old_keys = &prev_keys - &keys;
 
         if !new_keys.is_empty() || !old_keys.is_empty() {
-            //println!("new_keys: {:?}\told_keys:{:?}", new_keys, old_keys);
-        }
+            let hw_cfg = mem::get_area(mem::OFF_HARD_INP);
+            //let mut input_register: u8 = mem::get_area(mem::OFF_HARD_INP)[0] as u8;
 
-        for key in new_keys {
-            match key {
-                Keycode::Up => {
-                    println!("Up pressed");
-                },
-                Keycode::Down => {
-                    println!("Down pressed");
-                },
-                Keycode::Left => {
-                    println!("Left pressed");
-                },
-                Keycode::Right => {
-                    println!("Right pressed");
-                },
-                Keycode::Z => {
-                    println!("A pressed");
-                },
-                Keycode::X => {
-                    println!("B pressed");
-                },
-                Keycode::Backspace => {
-                    println!("Select pressed");
-                },
-                Keycode::Return => {
-                    println!("Start pressed");
-                },
-                _ => {}
+            for key in old_keys {
+                match key {
+                    Keycode::Up => {
+                        hw_cfg[0] ^= UP_BTN;
+                    },
+                    Keycode::Down => {
+                        hw_cfg[0] ^= DOWN_BTN;
+                    },
+                    Keycode::Left => {
+                        hw_cfg[0] ^= LEFT_BTN;
+                    },
+                    Keycode::Right => {
+                        hw_cfg[0] ^= RIGHT_BTN;
+                    },
+                    Keycode::Z => {
+                        hw_cfg[0] ^= A_BTN;
+                    },
+                    Keycode::X => {
+                        hw_cfg[0] ^= B_BTN;
+                    },
+                    Keycode::Backspace => {
+                        hw_cfg[0] ^= SELECT_BTN;
+                    },
+                    Keycode::Return => {
+                        hw_cfg[0] ^= START_BTN;
+                    },
+                    _ => {}
+                }
+            }
+
+            for key in new_keys {
+                match key {
+                    Keycode::Up => {
+                        hw_cfg[0] ^= UP_BTN;
+                    },
+                    Keycode::Down => {
+                        hw_cfg[0] ^= DOWN_BTN;
+                    },
+                    Keycode::Left => {
+                        hw_cfg[0] ^= LEFT_BTN;
+                    },
+                    Keycode::Right => {
+                        hw_cfg[0] ^= RIGHT_BTN;
+                    },
+                    Keycode::Z => {
+                        hw_cfg[0] ^= A_BTN;
+                    },
+                    Keycode::X => {
+                        hw_cfg[0] ^= B_BTN;
+                    },
+                    Keycode::Backspace => {
+                        hw_cfg[0] ^= SELECT_BTN;
+                    },
+                    Keycode::Return => {
+                        hw_cfg[0] ^= START_BTN;
+                    },
+                    _ => {}
+                }
+                
             }
         }
 
+        //println!("Register: {:08b}", mem::get_area(mem::OFF_HARD_INP)[0]);
         prev_keys = keys;
 
         l.execute::<()>("_update()").unwrap();
