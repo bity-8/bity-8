@@ -2,18 +2,17 @@ extern crate sdl2;
 extern crate rand;
 use audio::rand::prelude::*;
 
-use std;
 use sdl2::audio::AudioSpecDesired;
-use std::time::Duration;
+use sdl2::audio::AudioQueue;
 use self::sdl2::Sdl;
-// use bity_8::memory as mem;
+use memory as mem;
 
 const CHANNELS:  u32 = 1;
-const LENGTH:    u32 = 1_000 / 3;
 const SAMPLES:   u32 = 1024;
-const SPS:       u32 = 60;
-const PIANO_LEN: usize = 88;
+const BITY_SAMP: f32 = 128f32;
+const SPS:       u32 = 60;   // samples per second
 const AMPLIFIER: i16 = 10;
+const PIANO_LEN: usize = 88;
 
 // Piano frequencies taken from here: A0 - C8
 // http://www.sengpielaudio.com/calculator-notenames.htm
@@ -28,27 +27,38 @@ const PIANO_FREQS_INT: [u32; PIANO_LEN] =
  1760, 1865, 1976, 2093, 2217, 2349, 2489, 2637, 2794, 2960, 3136, 3322,
  3520, 3729, 3951, 4186];
 
-fn gen_wave(note: usize, wave_data: &[i8]) -> Vec<i16> {
-    let bytes_to_write = SPS * SAMPLES * LENGTH / 1_000;
-    let period = (SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN];
-    let sample_count = bytes_to_write;
+
+struct Channel {
+    device: AudioQueue<i16>
+}
+
+// TODO: Clean this all up. (don't want a stupid static variable here.)
+static mut INST_IND: usize = 0;
+pub fn play_instrument(device: &mut AudioQueue<i16>, note: usize, wave: mem::MemLoc) {
+    let wave_data = mem::get_area(wave);
+    let period = ((SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN]) as f32;
     let mut result = Vec::new();
 
-    for x in 0..sample_count {
-        let ind = (x as f32 % period as f32 / period as f32 * 128f32) as usize;
-        let amp = wave_data[ind];
+    // next: cache the last index.
+    for x in 0..SAMPLES {
+        let ind = (x as f32 % period / period * BITY_SAMP as f32) as usize;
+        let amp = unsafe { wave_data[(ind + INST_IND) % 128] };
         let amp = if amp == -128 {
             let r: i8 = random();
             if r == -128 { -127 } else { r }
         } else { amp };
+        //println!("{}", ind);
 
         result.push(amp as i16 * AMPLIFIER);
     }
 
-    result
+    unsafe { INST_IND += (SAMPLES as f32 % period / period * BITY_SAMP as f32) as usize; }
+    unsafe { INST_IND %= 128usize; }
+
+    device.queue(&result);
 }
 
-pub fn run(sdl_context: &mut Sdl) {
+pub fn init(sdl_context: &mut Sdl) -> AudioQueue<i16> {
     let audio_subsystem = sdl_context.audio().unwrap();
 
     let desired_spec = AudioSpecDesired {
@@ -60,18 +70,6 @@ pub fn run(sdl_context: &mut Sdl) {
         };
 
     let device = audio_subsystem.open_queue::<i16, _>(None, &desired_spec).unwrap();
-
     println!("{:?}", device.spec());
-
-    let wave_scale = |w| {
-        for i in 0..87 {
-            let wave = gen_wave(i, w);
-            device.queue(&wave); device.resume();
-        }
-        std::thread::sleep(Duration::from_millis(LENGTH as u64 * PIANO_LEN as u64));
-    };
-
-    wave_scale(mem::get_area(mem::INS1));
-
-    // Device is automatically closed when dropped
+    device
 }

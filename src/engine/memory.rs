@@ -18,11 +18,15 @@ pub const LOC_SAVE: MemLoc = (0x4E000..0x4E400); // Save
 pub const LOC_EMPT: MemLoc = (0x4E400..0x4F800); // Empty
 pub const LOC_MULT: MemLoc = (0x4F800..0x50000); // Multicart
 
-// Instrument Locations
-pub const LOC_INS1: MemLoc = (0x4DC00..0x4DC80); // Multicart
-pub const LOC_INS2: MemLoc = (0x4DC80..0x4DD00); // Multicart
-pub const LOC_INS3: MemLoc = (0x4DD00..0x4DD80); // Multicart
-pub const LOC_INS4: MemLoc = (0x4DD80..0x4DE00); // Multicart
+// 8 Instruments
+pub const LOC_INS1: MemLoc = (0x4DC00..0x4DC80);
+pub const LOC_INS2: MemLoc = (0x4DC80..0x4DD00);
+pub const LOC_INS3: MemLoc = (0x4DD00..0x4DD80);
+pub const LOC_INS4: MemLoc = (0x4DD80..0x4DE00);
+pub const LOC_INS5: MemLoc = (0x4DE00..0x4DE80);
+pub const LOC_INS6: MemLoc = (0x4DE80..0x4DF00);
+pub const LOC_INS7: MemLoc = (0x4DF00..0x4DF80);
+pub const LOC_INS8: MemLoc = (0x4DF80..0x4E000);
 
 pub const LOC_ALL:        MemLoc = (0x00000..0x50000);
 pub const LOC_REBOOTABLE: MemLoc = (0x00000..0x4F800); // Memory that gets reset
