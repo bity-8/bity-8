@@ -147,6 +147,7 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
                 },
                 _ => {}
             }
+        }
      
         for key in new_keys {
             match key {
@@ -176,8 +177,10 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
                 },
                 _ => {}
          
+            }
         }
     
     //println!("Register: {:08b}", mem::get_area(mem::OFF_HARD_INP)[0]);
-    keys
+    }
+    return keys;
 }
