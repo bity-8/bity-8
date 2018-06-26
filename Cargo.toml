@@ -12,12 +12,16 @@ publish = false
 name = "bity_8"
 path = "src/engine/lib.rs"
 
-[[bin]]
-name = "bity-8"
-
 [dependencies]
 hlua = "0.3"
+image = "0.19.0"
 
 [dependencies.sdl2]
 version = "0.31"
 features = ["image"]
+
+[[bin]]
+name = "bity-8"
+
+[[bin]]
+name = "convert-spritesheet"
