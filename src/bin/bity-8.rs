@@ -21,18 +21,21 @@ fn main() {
 
         mem::reset_memory();
         lua::load_file(Path::new(&args[1]), &mut l);
-        let mut audio_device = audio::init(&mut sdl_context);
-        let mut audio_device2 = audio::init(&mut sdl_context);
+        let mut channels = [
+            audio::Channel::new(&mut sdl_context), audio::Channel::new(&mut sdl_context),
+            audio::Channel::new(&mut sdl_context), audio::Channel::new(&mut sdl_context),
+        ];
 
         for i in 0..20*90 {
-            audio::play_instrument(&mut audio_device, 56 + i / 20, mem::LOC_INS1);
-            audio::play_instrument(&mut audio_device2, 0 + i / 20, mem::LOC_INS1);
+            channels[0].play_instrument(i / 20,      i);
+            channels[1].play_instrument(i / 20 + 4,  i+0);
+            channels[2].play_instrument(i / 20 + 7,  i+0);
+            channels[3].play_instrument(i / 20 + 12, i+0);
+            for x in channels.iter() { x.device.resume(); }
         }
-        audio_device.resume();
-        audio_device2.resume();
+
 
         thread::sleep(Duration::from_millis(100_000u64));
-        // audio::run(&mut audio_device);
         // display::run(&mut l, &mut sdl_context);
     }
 }
