@@ -1,19 +1,14 @@
 extern crate hlua;
 
-const SCR_X: u32 = 192;
-const SCR_Y: u32 = 144;
-const PIX_LEN: u32 = 2; // the size for each pixel.
-
-use std::time::Duration;
-use std::thread;
-use sdl2::Sdl;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::Texture;
 use sdl2::sys::{SDL_BYTEORDER, SDL_LIL_ENDIAN};
+
 use memory as mem;
+
+pub const SCR_X: u32 = 192;
+pub const SCR_Y: u32 = 144;
+pub const PIX_LEN: u32 = 2; // the size for each pixel.
 
 // Does the obvious, draws the screen to the canvas.
 // This could be threaded maybe.
@@ -54,55 +49,3 @@ pub fn draw_screen(texture: &mut Texture) {
     }).unwrap();
 }
 
-pub fn run(l: &mut hlua::Lua, sdl_context: &mut Sdl) {
-    // Measured in nano seconds.
-    let fps = Duration::from_secs(1).checked_div(60).unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem.window("rust-sdl2 demo: Cursor", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
-        .position_centered()
-        .build()
-        .unwrap();
-
-    let mut canvas = window.into_canvas()
-        .target_texture()
-        .present_vsync()
-        .build() .unwrap();
-
-    let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator
-        .create_texture_streaming(PixelFormatEnum::RGB888, SCR_X, SCR_Y)
-        .unwrap();
-
-    let mut events = sdl_context.event_pump().unwrap();
-
-    'mainloop: loop {
-        // ----- start measuring time...
-        use std::time::Instant;
-        let now = Instant::now();
-
-        for event in events.poll_iter() {
-            match event {
-                Event::Quit{..} | Event::KeyDown {
-                    keycode: Option::Some(Keycode::Escape), ..
-                } => break 'mainloop,
-                _ => {}
-            }
-        }
-
-        l.execute::<()>("_update()").unwrap();
-
-        draw_screen(&mut texture);
-        canvas.copy(&texture, None, None).unwrap();
-        canvas.present();
-
-        // ----- end measuring time...
-        // TODO: put a match here.
-        let elapsed = now.elapsed();
-
-        if fps > elapsed {
-            let diff = fps.checked_sub(elapsed).unwrap();
-            // println!("elapsed: {}, sleep: {}", elapsed.subsec_nanos(), diff.subsec_nanos());
-            thread::sleep(diff);
-        }
-    }
-}

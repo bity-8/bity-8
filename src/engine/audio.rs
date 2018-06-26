@@ -14,6 +14,7 @@ const BITY_SAMP: f32 = 128f32;
 const SPS:       u32 = 60;   // samples per second
 const AMPLIFIER: i16 = 10;
 const PIANO_LEN: usize = 88;
+const MAX_VOLUME: usize = 16;
 
 // Piano frequencies taken from here: A0 - C8
 // http://www.sengpielaudio.com/calculator-notenames.htm
@@ -31,7 +32,7 @@ const PIANO_FREQS_INT: [u32; PIANO_LEN] =
 ];
 
 const INSTRUMENTS_LEN: usize = 8;
-const INSTRUMENTS: [mem::MemLoc; 8] = 
+const INSTRUMENTS: [mem::MemLoc; INSTRUMENTS_LEN] = 
 [
     mem::LOC_INS1, mem::LOC_INS2, mem::LOC_INS3, mem::LOC_INS4,
     mem::LOC_INS5, mem::LOC_INS6, mem::LOC_INS7, mem::LOC_INS8,
@@ -43,7 +44,8 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn play_instrument(&mut self, note: usize, wave_num: usize) {
+    pub fn play_note(&mut self, note: usize, wave_num: usize, volume: usize) {
+        let volume = (volume % MAX_VOLUME) as i16;
         let wave_data = mem::get_area(INSTRUMENTS[wave_num % INSTRUMENTS_LEN].clone());
         let period = ((SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN]) as f32;
         let mut result = Vec::new();
@@ -57,6 +59,7 @@ impl Channel {
                 if r == -128 { -127 } else { r }
             } else { amp };
 
+            let amp = amp as i16 * AMPLIFIER / MAX_VOLUME as i16 * volume;
             result.push(amp as i16 * AMPLIFIER);
         }
 
