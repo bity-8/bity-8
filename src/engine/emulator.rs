@@ -15,10 +15,6 @@ use std::collections::HashSet;
 use std::time::Duration;
 use std::thread;
 
-const SCR_X: u32 = 192;
-const SCR_Y: u32 = 144;
-const PIX_LEN: u32 = 2; // the size for each pixel.
-
 const UP_BTN: i8 = 1;
 const DOWN_BTN: i8 = 2;
 const LEFT_BTN: i8 = 4;
@@ -39,12 +35,12 @@ pub struct Emulator<'a> {
 impl<'a> Emulator<'a> {
     pub fn new() -> Emulator<'a> {
         let mut sdl = sdl2::init().unwrap();
-        let mut channels = [
+        let channels = [
             audio::Channel::new(&mut sdl), audio::Channel::new(&mut sdl),
             audio::Channel::new(&mut sdl), audio::Channel::new(&mut sdl),
         ];
 
-        let mut l = lua::create_lua();
+        let l = lua::create_lua();
 
         Emulator {
             sdl: sdl,

@@ -1,16 +1,11 @@
 extern crate bity_8;
 
 use bity_8::lua;
-use bity_8::sdl2;
-use bity_8::display;
-use bity_8::audio;
 use bity_8::emulator;
 use bity_8::memory as mem;
 
 use std::env;
-use std::thread;
 use std::path::Path;
-use std::time::Duration;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -27,14 +22,12 @@ fn main() {
         // Code Initialization.
         lua::load_file(Path::new(&args[1]), &mut em.lua);
 
-        for i in 0..20*90 {
-            unsafe {
-                em.channels[0].play_note(i, 0, 15);
-                em.channels[1].play_note(i, 1, 15);
-                em.channels[2].play_note(i, 2, 15);
-                em.channels[3].play_note(i, 3, 15);
-                for x in em.channels.iter() { x.device.resume(); }
-            }
+        for i in 0..5*90 {
+            em.channels[0].play_note(i, 0, 15);
+            em.channels[1].play_note(i, 1, 15);
+            em.channels[2].play_note(i, 2, 15);
+            em.channels[3].play_note(i, 3, 15);
+            for x in em.channels.iter() { x.device.resume(); }
         }
         
         // Game loop.
