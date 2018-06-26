@@ -15,7 +15,6 @@ const SELECT_BTN: i8 = -128;
 
 use std::time::Duration;
 use std::thread;
-<<<<<<< HEAD
 use sdl2::Sdl;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
