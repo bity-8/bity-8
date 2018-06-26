@@ -35,6 +35,7 @@ pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // Hardware Config Locations
 pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Multicart
+pub const OFF_HARD_INP: MemLoc = (0x31..0x32); // Input
 
 // private worker functions
 fn add_mems(r1: MemLoc, r2: MemLoc) -> MemLoc {

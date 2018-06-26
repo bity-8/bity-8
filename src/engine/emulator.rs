@@ -4,14 +4,30 @@ extern crate hlua;
 use audio;
 use lua;
 use display;
+use memory as mem;
 
 use sdl2::Sdl;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
+use std::collections::HashSet;
 
 use std::time::Duration;
 use std::thread;
+
+const SCR_X: u32 = 192;
+const SCR_Y: u32 = 144;
+const PIX_LEN: u32 = 2; // the size for each pixel.
+
+const UP_BTN: i8 = 1;
+const DOWN_BTN: i8 = 2;
+const LEFT_BTN: i8 = 4;
+const RIGHT_BTN: i8 = 8;
+const A_BTN: i8 = 16;
+const B_BTN: i8 = 32;
+const START_BTN: i8 = 64;
+const SELECT_BTN: i8 = -128;
+
 
 pub struct Emulator<'a> {
     pub sdl: Sdl,
@@ -59,6 +75,7 @@ impl<'a> Emulator<'a> {
             .unwrap();
 
         let mut events = self.sdl.event_pump().unwrap();
+    let mut prev_keys = HashSet::new();
 
         'mainloop: loop {
             // ----- start measuring time...
@@ -73,6 +90,83 @@ impl<'a> Emulator<'a> {
                     _ => {}
                 }
             }
+
+            // Create a set of pressed Keys.
+            let keys = events.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
+
+            // Get the difference between the new and old sets.
+            let new_keys = &keys - &prev_keys;
+            let old_keys = &prev_keys - &keys;
+
+            if !new_keys.is_empty() || !old_keys.is_empty() {
+                let hw_cfg = mem::get_area(mem::OFF_HARD_INP);
+                //let mut input_register: u8 = mem::get_area(mem::OFF_HARD_INP)[0] as u8;
+
+                for key in old_keys {
+                    match key {
+                        Keycode::Up => {
+                            hw_cfg[0] ^= UP_BTN;
+                        },
+                        Keycode::Down => {
+                            hw_cfg[0] ^= DOWN_BTN;
+                        },
+                        Keycode::Left => {
+                            hw_cfg[0] ^= LEFT_BTN;
+                        },
+                        Keycode::Right => {
+                            hw_cfg[0] ^= RIGHT_BTN;
+                        },
+                        Keycode::Z => {
+                            hw_cfg[0] ^= A_BTN;
+                        },
+                        Keycode::X => {
+                            hw_cfg[0] ^= B_BTN;
+                        },
+                        Keycode::Backspace => {
+                            hw_cfg[0] ^= SELECT_BTN;
+                        },
+                        Keycode::Return => {
+                            hw_cfg[0] ^= START_BTN;
+                        },
+                        _ => {}
+                    }
+                }
+
+                for key in new_keys {
+                    match key {
+                        Keycode::Up => {
+                            hw_cfg[0] ^= UP_BTN;
+                        },
+                        Keycode::Down => {
+                            hw_cfg[0] ^= DOWN_BTN;
+                        },
+                        Keycode::Left => {
+                            hw_cfg[0] ^= LEFT_BTN;
+                        },
+                        Keycode::Right => {
+                            hw_cfg[0] ^= RIGHT_BTN;
+                        },
+                        Keycode::Z => {
+                            hw_cfg[0] ^= A_BTN;
+                        },
+                        Keycode::X => {
+                            hw_cfg[0] ^= B_BTN;
+                        },
+                        Keycode::Backspace => {
+                            hw_cfg[0] ^= SELECT_BTN;
+                        },
+                        Keycode::Return => {
+                            hw_cfg[0] ^= START_BTN;
+                        },
+                        _ => {}
+                    }
+
+                }
+            }
+
+            //println!("Register: {:08b}", mem::get_area(mem::OFF_HARD_INP)[0]);
+            prev_keys = keys;
+
 
             self.lua.execute::<()>("_update()").unwrap();
 
