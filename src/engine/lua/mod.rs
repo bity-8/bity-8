@@ -4,8 +4,8 @@ pub mod std;
 use self::hlua::Lua;
 use self::hlua::LuaError;
 use std::fs::File;
-use std::path::Path;
 use std::io::BufReader;
+use std::path::Path;
 
 // loads and evaluates the lua file.
 pub fn create_lua<'a>() -> Lua<'a> {

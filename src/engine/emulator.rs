@@ -1,19 +1,19 @@
-extern crate sdl2;
 extern crate hlua;
+extern crate sdl2;
 
 use audio;
-use lua;
 use display;
+use lua;
 use memory as mem;
 
-use sdl2::Sdl;
-use sdl2::pixels::PixelFormatEnum;
-use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::Sdl;
 use std::collections::HashSet;
 
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 const UP_BTN: i8 = 1;
 const DOWN_BTN: i8 = 2;
