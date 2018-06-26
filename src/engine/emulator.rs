@@ -4,7 +4,7 @@ extern crate hlua;
 use audio;
 use lua;
 use display;
-use memory as mem;
+use memory;
 
 use sdl2::Sdl;
 use sdl2::pixels::PixelFormatEnum;
@@ -24,11 +24,11 @@ const B_BTN: i8 = 32;
 const START_BTN: i8 = 64;
 const SELECT_BTN: i8 = -128;
 
-
 pub struct Emulator<'a> {
     pub sdl: Sdl,
     pub channels: [audio::Channel; 4],
     pub lua: hlua::Lua<'a>,
+    pub mem: memory::Memory,
 }
 
 // You can only create one of these.
@@ -41,12 +41,18 @@ impl<'a> Emulator<'a> {
         ];
 
         let l = lua::create_lua();
+        let m: memory::Memory = memory::Memory::new();
 
-        Emulator {
+        let mut em = Emulator {
             sdl: sdl,
             channels: channels,
             lua: l,
-        }
+            mem: m,
+        };
+
+        lua::std::load_std(&mut em);
+
+        em
     }
 
     pub fn run(&mut self) {
@@ -95,8 +101,8 @@ impl<'a> Emulator<'a> {
             let old_keys = &prev_keys - &keys;
 
             if !new_keys.is_empty() || !old_keys.is_empty() {
-                let hw_cfg = mem::get_area(mem::OFF_HARD_INP);
-                //let mut input_register: u8 = mem::get_area(mem::OFF_HARD_INP)[0] as u8;
+                let hw_cfg = self.mem.get_area(memory::OFF_HARD_INP);
+                //let mut input_register: u8 = memory::get_area(memory::OFF_HARD_INP)[0] as u8;
 
                 for key in old_keys {
                     match key {
@@ -160,13 +166,13 @@ impl<'a> Emulator<'a> {
                 }
             }
 
-            //println!("Register: {:08b}", mem::get_area(mem::OFF_HARD_INP)[0]);
+            //println!("Register: {:08b}", memory::get_area(memory::OFF_HARD_INP)[0]);
             prev_keys = keys;
 
 
             self.lua.execute::<()>("_update()").unwrap();
 
-            display::draw_screen(&mut texture);
+            display::draw_screen(&mut texture, &mut self.mem);
             canvas.copy(&texture, None, None).unwrap();
             canvas.present();
 

@@ -9,9 +9,7 @@ use std::io::BufReader;
 
 // loads and evaluates the lua file.
 pub fn create_lua<'a>() -> Lua<'a> {
-    let mut lua = Lua::new();
-    std::load_std(&mut lua);
-    lua
+    Lua::new()
 }
 
 pub fn load_file(file: &Path, lua: &mut Lua) {

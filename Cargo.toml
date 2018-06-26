@@ -16,6 +16,7 @@ path = "src/engine/lib.rs"
 name = "bity-8"
 
 [dependencies]
+lazy_static = "1.0"
 hlua = "0.3"
 rand = "0.5"
 

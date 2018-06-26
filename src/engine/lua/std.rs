@@ -1,13 +1,14 @@
 extern crate hlua;
 
 use memory as mem;
+use emulator;
 
-pub fn load_std(lua: &mut hlua::Lua) {
-    lua.openlibs(); // this is for testing, delete when not needed.
-    lua.set("_peek", hlua::function1(|pos: i32|                     mem::peek(  pos as usize)));
-    lua.set("_poke", hlua::function2(|pos: i32, val|                mem::poke_w(pos as usize, val)));
-    lua.set("_mset", hlua::function3(|pos: i32, len: i32, val|      mem::mset_w(pos as usize, len as usize, val)));
-    lua.set("_mcpy", hlua::function3(|des: i32, pos: i32, len: i32| mem::mcpy_w(des as usize, pos as usize, len as usize)));
+pub fn load_std<'a, 'b> (em: &'b mut emulator::Emulator<'a>) {
+    em.lua.openlibs(); // this is for testing, delete when not needed.
+    //em.lua.set("_peek", hlua::function1(|pos: i32|                     em.mem.peek(  pos as usize)));
+    //em.lua.set("_poke", hlua::function2(|pos: i32, val|                em.mem.poke_w(pos as usize, val)));
+    //em.lua.set("_mset", hlua::function3(|pos: i32, len: i32, val|      em.mem.mset_w(pos as usize, len as usize, val)));
+    //em.lua.set("_mcpy", hlua::function3(|des: i32, pos: i32, len: i32| em.mem.mcpy_w(des as usize, pos as usize, len as usize)));
 }
 
 #[test]

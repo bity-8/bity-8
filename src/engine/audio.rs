@@ -7,7 +7,7 @@ use audio::rand::prelude::*;
 use sdl2::audio::AudioSpecDesired;
 use sdl2::audio::AudioQueue;
 use self::sdl2::Sdl;
-use memory as mem;
+use memory;
 
 const SAMPLES:   u32 = 1024;
 const BITY_SAMP: f32 = 128f32;
@@ -32,10 +32,10 @@ const PIANO_FREQS_INT: [u32; PIANO_LEN] =
 ];
 
 const INSTRUMENTS_LEN: usize = 8;
-const INSTRUMENTS: [mem::MemLoc; INSTRUMENTS_LEN] = 
+const INSTRUMENTS: [memory::MemLoc; INSTRUMENTS_LEN] = 
 [
-    mem::LOC_INS1, mem::LOC_INS2, mem::LOC_INS3, mem::LOC_INS4,
-    mem::LOC_INS5, mem::LOC_INS6, mem::LOC_INS7, mem::LOC_INS8,
+    memory::LOC_INS1, memory::LOC_INS2, memory::LOC_INS3, memory::LOC_INS4,
+    memory::LOC_INS5, memory::LOC_INS6, memory::LOC_INS7, memory::LOC_INS8,
 ];
 
 pub struct Channel {
@@ -44,9 +44,9 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn play_note(&mut self, note: usize, wave_num: usize, volume: usize) {
+    pub fn play_note(&mut self, mem: &mut memory::Memory, note: usize, wave_num: usize, volume: usize) {
         let volume = (volume % MAX_VOLUME) as i16;
-        let wave_data = mem::get_area(INSTRUMENTS[wave_num % INSTRUMENTS_LEN].clone());
+        let wave_data = mem.get_area(INSTRUMENTS[wave_num % INSTRUMENTS_LEN].clone());
         let period = ((SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN]) as f32;
         let mut result = Vec::new();
 

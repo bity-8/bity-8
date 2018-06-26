@@ -1,11 +1,9 @@
 use std::cmp;
 use std::ops::Range;
 
-pub type Memory = [i8; CART_LEN];
-pub type MemLoc = Range<usize>;
-
 pub const CART_LEN : usize = 0x50000; // End of cartridge
-static mut MEM: Memory = [0; CART_LEN];
+
+pub type MemLoc = Range<usize>;
 
 // Global Memory Constants
 pub const LOC_CART: MemLoc = (0x00000..0x40000); // Cartridge
@@ -37,7 +35,90 @@ pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Multicart
 pub const OFF_HARD_INP: MemLoc = (0x31..0x32); // Input
 
-// private worker functions
+
+pub struct Memory {
+    mem: [i8; CART_LEN],
+}
+
+impl Memory {
+    pub fn new() -> Memory {
+        Memory {
+            mem: [0; CART_LEN]
+        }
+    }
+
+    // Helper funcs for getting certain areas of the cartridge.
+    pub fn get_area(&mut self, area: MemLoc) -> &mut [i8] {
+        &mut self.mem[area]
+    }
+
+    pub fn get_sub_area(&mut self, area: MemLoc, off: MemLoc) -> &mut [i8] {
+        &mut self.mem[add_mems(area, off)]
+    }
+
+    // Maps a vector to memory. This is safe if you mess up the parameters.
+    pub fn map_vector(&mut self, start: usize, len: usize, vec: &[i8]) {
+        let len = cmp::min(vec.len(), len);
+
+        for vec_ind in 0..len {
+            let mem_ind = start+vec_ind;
+            if mem_ind >= CART_LEN { return }
+            self.mem[mem_ind] = vec[vec_ind];
+        }
+    }
+
+    // Maps one value to memory.
+    // You can use this for clearing memory.
+    fn mset(&mut self, pos: usize, len: usize, val: i8, area: MemLoc) {
+        for i in area_intersect(pos..pos+len, area) {
+            self.mem[i] = val;
+        }
+    }
+
+    fn mcpy(&mut self, dest: usize, pos: usize, len: usize, area: MemLoc) {
+        // if the section of memory you write to is read only, then don't write on that section, but
+        // also don't stop!
+
+        let area = area_intersect(dest..dest+len, area);
+        let area = area.start - dest .. area.end - area.start;
+
+        for i in area {
+            self.mem[i+dest] = self.mem[i+pos];
+        }
+    }
+
+    // Write to a memory location
+    fn poke(&mut self, pos: usize, val: i8, area: MemLoc) {
+        if pos_in_bounds(pos, area) {
+            self.mem[pos] = val;
+        }
+    }
+
+    // Read a memory location
+    pub fn peek(&mut self, pos: usize) -> i8 {
+        if pos < CART_LEN {
+            self.mem[pos]
+        } else {
+            0
+        }
+    }
+
+    // for short/writable areas.
+    pub fn poke_w(&mut self, pos: usize, val: i8)  { self.poke(pos, val, LOC_WRITABLE); }
+    pub fn mset_w(&mut self, pos: usize, len: usize, val: i8) { self.mset(pos, len, val, LOC_WRITABLE); }
+    pub fn mcpy_w(&mut self, dest: usize, pos: usize, len: usize) { self.mcpy(dest, pos, len, LOC_WRITABLE); }
+
+    pub fn poke_a(&mut self, pos: usize, val: i8)  { self.poke(pos, val, LOC_ALL); }
+    pub fn mset_a(&mut self, pos: usize, len: usize, val: i8) { self.mset(pos, len, val, LOC_ALL); }
+    pub fn mcpy_a(&mut self, dest: usize, pos: usize, len: usize) { self.mcpy(dest, pos, len, LOC_ALL); }
+
+    pub fn reset_memory(&mut self, ) {
+        self.mset_a(0, CART_LEN, 0);
+        self.map_vector(LOC_INST.start, DEF_INST_LEN, &WAVE_DATA);
+    }
+}
+
+// And a few lil' worker/helper functions
 fn add_mems(r1: MemLoc, r2: MemLoc) -> MemLoc {
     (r1.start + r2.start .. r1.start + r2.end)
 }
@@ -56,106 +137,6 @@ fn area_intersect(a1: MemLoc, a2: MemLoc) -> MemLoc {
         start..end
     }
 }
-
-// Helper funcs for getting certain areas of the cartridge.
-pub fn get_area(area: MemLoc) -> &'static mut [i8] {
-    unsafe { &mut MEM[area] }
-}
-
-pub fn get_sub_area(area: MemLoc, off: MemLoc) -> &'static mut [i8] {
-    unsafe { &mut MEM[add_mems(area, off)] }
-}
-
-// Maps a vector to memory. This is safe if you mess up the parameters.
-pub fn map_vector(start: usize, len: usize, vec: &[i8]) {
-    let len = cmp::min(vec.len(), len);
-
-    for vec_ind in 0..len {
-        let mem_ind = start+vec_ind;
-        if mem_ind >= CART_LEN { return }
-        unsafe { MEM[mem_ind] = vec[vec_ind]; }
-    }
-}
-
-// Maps one value to memory.
-// You can use this for clearing memory.
-fn mset(pos: usize, len: usize, val: i8, area: MemLoc) {
-    for i in area_intersect(pos..pos+len, area) {
-        unsafe { MEM[i] = val; }
-    }
-}
-
-fn mcpy(dest: usize, pos: usize, len: usize, area: MemLoc) {
-    // if the section of memory you write to is read only, then don't write on that section, but
-    // also don't stop!
-
-    let area = area_intersect(dest..dest+len, area);
-    let area = area.start - dest .. area.end - area.start;
-
-    for i in area {
-        unsafe {
-            MEM[i+dest] = MEM[i+pos];
-        }
-    }
-}
-
-// Write to a memory location
-fn poke(pos: usize, val: i8, area: MemLoc) {
-    if pos_in_bounds(pos, area) {
-        unsafe { MEM[pos] = val; }
-    }
-}
-
-// Read a memory location
-pub fn peek(pos: usize) -> i8 {
-    if pos < CART_LEN {
-        unsafe { MEM[pos] }
-    } else {
-        0
-    }
-}
-
-// for short/writable areas.
-pub fn poke_w(pos: usize, val: i8)  { poke(pos, val, LOC_WRITABLE); }
-pub fn mset_w(pos: usize, len: usize, val: i8) { mset(pos, len, val, LOC_WRITABLE); }
-pub fn mcpy_w(dest: usize, pos: usize, len: usize) { mcpy(dest, pos, len, LOC_WRITABLE); }
-
-pub fn poke_a(pos: usize, val: i8)  { poke(pos, val, LOC_ALL); }
-pub fn mset_a(pos: usize, len: usize, val: i8) { mset(pos, len, val, LOC_ALL); }
-pub fn mcpy_a(dest: usize, pos: usize, len: usize) { mcpy(dest, pos, len, LOC_ALL); }
-
-pub fn reset_memory() {
-    mset_a(0, CART_LEN, 0);
-    map_vector(LOC_INST.start, DEF_INST_LEN, &WAVE_DATA);
-}
-
-#[test]
-fn test_mem() {
-    mset_a(0, CART_LEN, 0);
-
-    {
-        let x = get_area(LOC_CART);
-        x[3] = 22;
-    }
-
-    map_vector(0, 20, &[2, 4, 5]);
-    mcpy_a(4, 0, 4);
-
-    assert_eq!(peek(0), 2);
-    assert_eq!(peek(1), 4);
-    assert_eq!(peek(2), 5);
-    assert_eq!(peek(3), 22);
-
-    assert_eq!(peek(4), 2);
-    assert_eq!(peek(5), 4);
-    assert_eq!(peek(6), 5);
-    assert_eq!(peek(7), 22);
-
-    for i in 8..CART_LEN {
-        assert_eq!(peek(i), 0);
-    }
-}
-
 
 // used python to generate these :).
 const DEF_INST_LEN: usize = 128*4;
@@ -199,3 +180,30 @@ const WAVE_DATA: [i8; DEF_INST_LEN] =
     -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
     -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
 ];
+
+#[test]
+fn test_mem() {
+    mset_a(0, CART_LEN, 0);
+
+    {
+        let x = get_area(LOC_CART);
+        x[3] = 22;
+    }
+
+    map_vector(0, 20, &[2, 4, 5]);
+    mcpy_a(4, 0, 4);
+
+    assert_eq!(peek(0), 2);
+    assert_eq!(peek(1), 4);
+    assert_eq!(peek(2), 5);
+    assert_eq!(peek(3), 22);
+
+    assert_eq!(peek(4), 2);
+    assert_eq!(peek(5), 4);
+    assert_eq!(peek(6), 5);
+    assert_eq!(peek(7), 22);
+
+    for i in 8..CART_LEN {
+        assert_eq!(peek(i), 0);
+    }
+}
