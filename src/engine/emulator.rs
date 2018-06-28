@@ -8,7 +8,6 @@ use memory as mem;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::Sdl;
 use std::collections::HashSet;
 
@@ -29,6 +28,7 @@ pub struct Emulator<'a> {
     pub sdl: Sdl,
     pub channels: [audio::Channel; 4],
     pub lua: hlua::Lua<'a>,
+    pub screen: display::Screen<'a>,
 }
 
 // You can only create one of these.
@@ -41,34 +41,19 @@ impl<'a> Emulator<'a> {
         ];
 
         let l = lua::create_lua();
+        let s = display::init(&mut sdl);
 
         Emulator {
             sdl: sdl,
             channels: channels,
             lua: l,
+            screen: s,
         }
     }
 
     pub fn run(&mut self) {
         // Measured in nano seconds.
         let fps = Duration::from_secs(1).checked_div(60).unwrap();
-        let video_subsystem = self.sdl.video().unwrap();
-        let window = video_subsystem.window("rust-sdl2 demo: Cursor",
-                                            display::SCR_X*display::PIX_LEN,
-                                            display::SCR_Y*display::PIX_LEN)
-            .position_centered()
-            .build()
-            .unwrap();
-
-        let mut canvas = window.into_canvas()
-            .target_texture()
-            .present_vsync()
-            .build() .unwrap();
-
-        let texture_creator = canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(PixelFormatEnum::RGB888, display::SCR_X, display::SCR_Y)
-            .unwrap();
 
         let mut events = self.sdl.event_pump().unwrap();
         let mut prev_keys = HashSet::new();
@@ -92,12 +77,9 @@ impl<'a> Emulator<'a> {
 
             self.lua.execute::<()>("_update()").unwrap();
 
-            display::draw_screen(&mut texture);
-            canvas.copy(&texture, None, None).unwrap();
-            canvas.present();
+            display::draw_screen(&mut self.screen);
 
             // ----- end measuring time...
-            // TODO: put a match here.
             let elapsed = now.elapsed();
 
             if fps > elapsed {

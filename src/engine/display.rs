@@ -1,18 +1,42 @@
 extern crate hlua;
 
+use sdl2::Sdl;
 use sdl2::pixels::Color;
 use sdl2::render::Texture;
 use sdl2::sys::{SDL_BYTEORDER, SDL_LIL_ENDIAN};
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::render::WindowCanvas;
 
+pub type Screen<'a> = (WindowCanvas, Texture<'a>);
 use memory as mem;
 
 pub const SCR_X: u32 = 192;
 pub const SCR_Y: u32 = 144;
 pub const PIX_LEN: u32 = 2; // the size for each pixel.
 
+
+pub fn init<'a>(sdl: &mut Sdl) -> (WindowCanvas, Texture<'a>) {
+    let video_subsystem = sdl.video().unwrap();
+    let window = video_subsystem.window("BITY-8", SCR_X*PIX_LEN, SCR_Y*PIX_LEN)
+        .position_centered()
+        .build()
+        .unwrap();
+
+    let canvas = window.into_canvas()
+        .target_texture()
+        .present_vsync()
+        .build() .unwrap();
+
+    let mut texture = canvas.texture_creator()
+        .create_texture_streaming(PixelFormatEnum::RGB888, SCR_X, SCR_Y)
+        .unwrap();
+
+    (canvas, texture)
+}
+
 // Does the obvious, draws the screen to the canvas.
 // This could be threaded maybe.
-pub fn draw_screen(texture: &mut Texture) {
+pub fn draw_screen(s: &mut Screen) {
     let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
     let mut colors = [Color::RGB(0, 0, 0); 16];
 
@@ -28,7 +52,7 @@ pub fn draw_screen(texture: &mut Texture) {
 
     let screen = mem::get_area(mem::LOC_SCRE);
 
-    texture.with_lock(None, |arr, _row_w| {
+    s.1.with_lock(None, |arr, _row_w| {
         // remember there are 2 pixels in each byte.
         for i in 0..screen.len() {
             let cols  = screen[i] as usize;
@@ -47,4 +71,7 @@ pub fn draw_screen(texture: &mut Texture) {
             arr[i + 6usize] = colors[right].b;
         }
     }).unwrap();
+
+    s.0.copy(&s.1, None, None).unwrap();
+    s.0.present();
 }
