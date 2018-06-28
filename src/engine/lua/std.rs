@@ -21,12 +21,26 @@ pub fn load_std(lua: &mut hlua::Lua) {
     lua.set("_rand", hlua::function1(|upper: f32| -> f32            {4f32}));
     
     // PICO-8 Math bitwise: and, or, xor, not, rotl, rotr, left shift, right shift (arithmetic and logical)
-    lua.set("_and", hlua::function2(|val1: f32, val2: f32| -> f32   {f32::from_bits(val1.to_bits() & val2.to_bits())}));
-    lua.set("_or",  hlua::function2(|val1: f32, val2: f32| -> f32   {f32::from_bits(val1.to_bits() | val2.to_bits())}));
-    lua.set("_xor", hlua::function2(|val1: f32, val2: f32| -> f32   {f32::from_bits(val1.to_bits() ^ val2.to_bits())}));
-    lua.set("_not", hlua::function1(|val1: f32| -> f32              {f32::from_bits(!(val1.to_bits()))}));
+    lua.set("_and", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("_or",  hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("_xor", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("_not", hlua::function1(|val1: i32| -> i32              {!val1}));
 
-
+    // Drawing
+    lua.set("_draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: i8| {
+        let mut realwidth = width/2;
+        let mut realheight = height;
+        if x + realwidth >= 192 {
+            realwidth = 192/2 - x/2;
+        }
+        if y + realheight >= 144 {
+            realheight = 144 - y;
+        }
+        if realheight == 0 || realwidth == 0 { return; };
+        for i in y..(y+realheight) {
+            mem::mset_w((0x40400 + x/2 + (192/2 * i)) as usize, realwidth as usize, color | (color << 4));
+        }
+    }));
 }
 
 #[test]
