@@ -8,6 +8,7 @@ use memory as mem;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::render::WindowCanvas;
 use sdl2::Sdl;
 use std::collections::HashSet;
 
@@ -28,7 +29,7 @@ pub struct Emulator<'a> {
     pub sdl: Sdl,
     pub channels: [audio::Channel; 4],
     pub lua: hlua::Lua<'a>,
-    pub screen: display::Screen<'a>,
+    pub screen: WindowCanvas,
 }
 
 // You can only create one of these.
