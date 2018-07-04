@@ -1,5 +1,7 @@
 extern crate hlua;
+extern crate bresenham;
 
+use self::bresenham::Bresenham;
 use memory as mem;
 
 pub fn load_std(lua: &mut hlua::Lua) {
@@ -25,6 +27,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
     lua.set("_or",  hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
     lua.set("_xor", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
     lua.set("_not", hlua::function1(|val1: i32| -> i32              {!val1}));
+    //lua.set("_rotl", hlua::function2(|val: i32, amt: i32|))
 
     // Drawing
     lua.set("_draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: i8| {
@@ -38,9 +41,32 @@ pub fn load_std(lua: &mut hlua::Lua) {
         }
         if realheight == 0 || realwidth == 0 { return; };
         for i in y..(y+realheight) {
+            // Calculation:
+            // 0x40400 (buffer addr)
+            // x/2 (pixels are stored in nibbles)
+            // 192/2 * i (calculate row offset)
             mem::mset_w((0x40400 + x/2 + (192/2 * i)) as usize, realwidth as usize, color | (color << 4));
         }
     }));
+
+    lua.set("_draw_line", hlua::function5(|x1: i32, y1: i32, x2: i32, y2: i32, color: u8| {
+      for (x, y) in Bresenham::new((x1 as isize,y1 as isize),(x2 as isize,y2 as isize)) {
+        if (x < 0 || x > 192) || (y < 0 || y > 144) {
+          continue;
+        }
+        let mut pixel_current = mem::peek((0x40400 + x/2 + (192/2 * y)) as usize) as u8;
+        if (x & 1) == 0 {
+          pixel_current = (pixel_current & 0x0F) | (color << 4);
+        } else {
+          pixel_current = (pixel_current & 0xF0) | color;
+        }
+        mem::poke_w((0x40400 + x/2 + (192/2 * y)) as usize, pixel_current as i8);
+      }
+    }));
+
+    //lua.set("_draw_circle", hlua::function4(|x: i32, y: i32, radius: i32, color: i8| {
+
+    //}))
 }
 
 #[test]

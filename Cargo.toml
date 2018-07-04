@@ -16,6 +16,7 @@ path = "src/engine/lib.rs"
 hlua = "0.3"
 image = "0.19.0"
 rand = "0.5"
+bresenham = "0.1.1"
 
 [dependencies.sdl2]
 version = "0.31"
