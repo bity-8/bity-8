@@ -33,6 +33,27 @@ pub struct Emulator<'a> {
 
 // You can only create one of these.
 impl<'a> Emulator<'a> {
+    // Reads the memory, plays the note, updates memory.
+    pub fn update_audio_memory(&mut self) {
+        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_NOT);
+
+        // 2 notes per channel. 2 bytes per note. 4 channels. So... 16 bytes.
+        for i in 0..4 {
+            notes[i*4+0] = notes[i*4+2]; // move next to current note.
+            notes[i*4+1] = notes[i*4+3]; // move next to current note.
+
+            // And, let's not zero out the current note in memory :).
+            // But we will play the current note now.
+            // Remember that the top bit is "reserved for future use."
+            let note       =  notes[i*4+1];
+            let instrument = (notes[i*4] >> 4) & 0b0111i8;
+            let volume     =  notes[i*4]       & 0b1111i8;
+
+            println!("c: {}, i: {}, vol: {}, not: {}", i, instrument, volume, note);
+            self.channels[i].play_note(note as usize, instrument as usize, volume as usize);
+        }
+    }
+
     pub fn new() -> Emulator<'a> {
         let mut sdl = sdl2::init().unwrap();
         let channels = [
@@ -73,10 +94,19 @@ impl<'a> Emulator<'a> {
         let mut events = self.sdl.event_pump().unwrap();
         let mut prev_keys = HashSet::new();
 
+        // call init
+        // self.lua.execute::<()>("_init()").unwrap();
+
+        // start sound
+        for x in self.channels.iter() { x.device.resume(); }
+
         'mainloop: loop {
             // ----- start measuring time...
             use std::time::Instant;
             let now = Instant::now();
+
+            // Handle sound first
+            self.update_audio_memory();
 
             for event in events.poll_iter() {
                 match event {
@@ -90,6 +120,8 @@ impl<'a> Emulator<'a> {
             // Handle input            
             prev_keys = get_input(&mut events, prev_keys);
 
+
+            // Handle code
             self.lua.execute::<()>("_update()").unwrap();
 
             display::draw_screen(&mut texture);

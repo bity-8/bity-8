@@ -8,6 +8,18 @@ for k, v in pairs(colors) do
    _poke(0x40000+k-1, v)
 end
 
+_poke(0x40034, 0x1F) -- CHAN 1
+_poke(0x40035, 0x2F) -- CHAN 1
+
+-- _poke(0x40038, 0x2F) -- CHAN 2
+-- _poke(0x40039, 0x3F) -- CHAN 2
+
+-- _poke(0x4003C, 0x3F) -- CHAN 3
+-- _poke(0x4003D, 0x2F) -- CHAN 3
+
+-- _poke(0x40040, 0x0F) -- CHAN 4
+-- _poke(0x40041, 0x1F) -- CHAN 4
+
 function _update()
    -- set the screen.
    for i=0, 192-1 do
