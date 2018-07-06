@@ -45,7 +45,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
             // 0x40400 (buffer addr)
             // x/2 (pixels are stored in nibbles)
             // 192/2 * i (calculate row offset)
-            mem::mset_w((0x40400 + x/2 + (192/2 * i)) as usize, realwidth as usize, color | (color << 4));
+            mem::mset_w(get_buffer_loc(x,i), realwidth as usize, color | (color << 4));
         }
     }));
 
@@ -54,13 +54,13 @@ pub fn load_std(lua: &mut hlua::Lua) {
         if (x < 0 || x > 192) || (y < 0 || y > 144) {
           continue;
         }
-        let mut pixel_current = mem::peek((0x40400 + x/2 + (192/2 * y)) as usize) as u8;
+        let mut pixel_current = mem::peek(get_buffer_loc(x,y)) as u8;
         if (x & 1) == 0 {
           pixel_current = (pixel_current & 0x0F) | (color << 4);
         } else {
           pixel_current = (pixel_current & 0xF0) | color;
         }
-        mem::poke_w((0x40400 + x/2 + (192/2 * y)) as usize, pixel_current as i8);
+        mem::poke_w(get_buffer_loc(x,y), pixel_current as i8);
       }
     }));
 
@@ -69,7 +69,13 @@ pub fn load_std(lua: &mut hlua::Lua) {
     //}))
 
     // Input
-    
+    lua.set("btn", hlua::function0(||{
+      mem::peek(())
+    }))
+}
+
+fn get_buffer_loc(x: isize, y: isize) -> usize{
+  (0x40400 + x/2 + (192/2 * y)) as usize
 }
 
 #[test]
