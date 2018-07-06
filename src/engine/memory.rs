@@ -19,14 +19,14 @@ pub const LOC_EMPT: MemLoc = (0x4E400..0x4F800); // Empty
 pub const LOC_MULT: MemLoc = (0x4F800..0x50000); // Multicart
 
 // 8 Instruments, This could be useful.
-pub const LOC_INS1: MemLoc = (0x4DC00..0x4DC80);
-pub const LOC_INS2: MemLoc = (0x4DC80..0x4DD00);
-pub const LOC_INS3: MemLoc = (0x4DD00..0x4DD80);
-pub const LOC_INS4: MemLoc = (0x4DD80..0x4DE00);
-pub const LOC_INS5: MemLoc = (0x4DE00..0x4DE80);
-pub const LOC_INS6: MemLoc = (0x4DE80..0x4DF00);
-pub const LOC_INS7: MemLoc = (0x4DF00..0x4DF80);
-pub const LOC_INS8: MemLoc = (0x4DF80..0x4E000);
+pub const OFF_INS1: MemLoc = (0x000..0x080);
+pub const OFF_INS2: MemLoc = (0x080..0x100);
+pub const OFF_INS3: MemLoc = (0x100..0x180);
+pub const OFF_INS4: MemLoc = (0x180..0x200);
+pub const OFF_INS5: MemLoc = (0x200..0x280);
+pub const OFF_INS6: MemLoc = (0x280..0x300);
+pub const OFF_INS7: MemLoc = (0x300..0x380);
+pub const OFF_INS8: MemLoc = (0x380..0x400);
 
 pub const LOC_ALL:        MemLoc = (0x00000..0x50000);
 pub const LOC_REBOOTABLE: MemLoc = (0x00000..0x4F800); // Memory that gets reset
@@ -35,10 +35,11 @@ pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // Hardware Config Locations
 pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Pallete
+pub const OFF_HARD_FNT: MemLoc = (0x30..0x90); // Font
 pub const OFF_HARD_INP: MemLoc = (0x31..0x32); // Input
 
 // Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
-pub const OFF_HARD_NOT: MemLoc = (0x32..0x42);
+pub const OFF_HARD_NOT: MemLoc = (0x92..0xA2);
 
 // private worker functions
 fn add_mems(r1: MemLoc, r2: MemLoc) -> MemLoc {

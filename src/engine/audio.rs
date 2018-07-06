@@ -35,8 +35,8 @@ const PIANO_FREQS_INT: [u32; PIANO_LEN] =
 const INSTRUMENTS_LEN: usize = 8;
 const INSTRUMENTS: [mem::MemLoc; INSTRUMENTS_LEN] = 
 [
-    mem::LOC_INS1, mem::LOC_INS2, mem::LOC_INS3, mem::LOC_INS4,
-    mem::LOC_INS5, mem::LOC_INS6, mem::LOC_INS7, mem::LOC_INS8,
+    mem::OFF_INS1, mem::OFF_INS2, mem::OFF_INS3, mem::OFF_INS4,
+    mem::OFF_INS5, mem::OFF_INS6, mem::OFF_INS7, mem::OFF_INS8,
 ];
 
 pub struct Wave {
@@ -57,7 +57,7 @@ impl AudioCallback for Wave {
         //println!("c: {}, i: {}, vol: {}, not: {}", self.channel, instrument, volume, note);
 
         let volume = (volume % MAX_VOLUME) as i16;
-        let wave_data = mem::get_area(INSTRUMENTS[instrument % INSTRUMENTS_LEN].clone());
+        let wave_data = mem::get_sub_area(mem::LOC_INST, INSTRUMENTS[instrument % INSTRUMENTS_LEN].clone());
         let period = ((SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN]) as f32;
 
         // next: cache the last index.

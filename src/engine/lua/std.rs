@@ -93,10 +93,11 @@ pub fn load_std(lua: &mut hlua::Lua) {
 
     // Input
     lua.set("btn_reg", hlua::function0(|| -> i8 {
-      mem::peek(0x40031)
+      mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start)
     }));
+
     lua.set("btn", hlua::function1(|button: i32| -> bool {
-      let register = mem::peek_u(0x40031);
+      let register = mem::peek_u(mem::LOC_HARD.start + mem::OFF_HARD_INP.start);
       match button {
         0 => (register & 0b00000001) > 0,
         1 => (register & 0b00000010) > 0,
@@ -114,7 +115,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
 fn get_buffer_loc(x: isize, y: isize) -> usize{
   let x = cmp::min(192, x);
   let y = cmp::min(144, y);
-  (0x40400 + x/2 + (192/2 * y)) as usize
+  (mem::LOC_SCRE.start + x/2 + (192/2 * y)) as usize
 }
 
 fn draw_line(x1:i32,y1:i32,x2:i32,y2:i32,color:u8) {
