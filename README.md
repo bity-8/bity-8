@@ -1,6 +1,6 @@
-= Bity-8
+# Bity-8
 
-== About
+## About
 BITY-8 is a fantasy console comparable to many others fantasy consoles: PICO-8,
 TIC-80, LICO-12, PV8, and many more!
 
@@ -14,10 +14,10 @@ hardware for the fantasy console has never existed before, but it could!
 Fantasy consoles are slowly gaining popularity because they are fun to play
 with and fun to develop with. Begin your BITY-8 journey today!
 
-== Specifications
+## Specifications
 Let's put our core specifications here.
 
-== Testing
+## Testing
 Make sure you test in a single thread like this:
 `cargo test -- --test-threads=1`.
 
