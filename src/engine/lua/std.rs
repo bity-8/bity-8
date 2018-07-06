@@ -11,26 +11,26 @@ pub fn load_std(lua: &mut hlua::Lua) {
     lua.set("_mset", hlua::function3(|pos: i32, len: i32, val|      mem::mset_w(pos as usize, len as usize, val)));
     lua.set("_mcpy", hlua::function3(|des: i32, pos: i32, len: i32| mem::mcpy_w(des as usize, pos as usize, len as usize)));
     // PICO-8 Math library: max, min, mid, floor, ceiling, cos, sin, atan2, sqrt, abs, rnd, srand
-    lua.set("_max" , hlua::function2(|val: f32, other: f32| -> f32  {f32::max(val, other)}));
-    lua.set("_min" , hlua::function2(|val: f32, other: f32| -> f32  {f32::min(val, other)}));
-    lua.set("_floor" , hlua::function1(|val: f32| -> f32            {f32::floor(val)}));
-    lua.set("_ceil" , hlua::function1(|val: f32| -> f32             {f32::ceil(val)}));
-    lua.set("_sin" , hlua::function1(|val: f32| -> f32              {f32::sin(val)}));
-    lua.set("_cos" , hlua::function1(|val: f32| -> f32              {f32::cos(val)}));
-    lua.set("_atan2", hlua::function2(|val1: f32, val2: f32| -> f32 {f32::atan2(val1, val2)}));
-    lua.set("_sqrt" , hlua::function1(|val: f32| -> f32             {f32::sqrt(val)}));
-    lua.set("_abs" , hlua::function1(|val: f32| -> f32              {f32::abs(val)}));
-    lua.set("_rand", hlua::function1(|upper: f32| -> f32            {4f32}));
+    lua.set("max" , hlua::function2(|val: f32, other: f32| -> f32  {f32::max(val, other)}));
+    lua.set("min" , hlua::function2(|val: f32, other: f32| -> f32  {f32::min(val, other)}));
+    lua.set("floor" , hlua::function1(|val: f32| -> f32            {f32::floor(val)}));
+    lua.set("ceil" , hlua::function1(|val: f32| -> f32             {f32::ceil(val)}));
+    lua.set("sin" , hlua::function1(|val: f32| -> f32              {f32::sin(val)}));
+    lua.set("cos" , hlua::function1(|val: f32| -> f32              {f32::cos(val)}));
+    lua.set("atan2", hlua::function2(|val1: f32, val2: f32| -> f32 {f32::atan2(val1, val2)}));
+    lua.set("sqrt" , hlua::function1(|val: f32| -> f32             {f32::sqrt(val)}));
+    lua.set("abs" , hlua::function1(|val: f32| -> f32              {f32::abs(val)}));
+    lua.set("rand", hlua::function1(|upper: f32| -> f32            {4f32}));
     
     // PICO-8 Math bitwise: and, or, xor, not, rotl, rotr, left shift, right shift (arithmetic and logical)
-    lua.set("_and", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
-    lua.set("_or",  hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
-    lua.set("_xor", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
-    lua.set("_not", hlua::function1(|val1: i32| -> i32              {!val1}));
+    lua.set("band", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("bor",  hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("bxor", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
+    lua.set("bnot", hlua::function1(|val1: i32| -> i32              {!val1}));
     //lua.set("_rotl", hlua::function2(|val: i32, amt: i32|))
 
     // Drawing
-    lua.set("_draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: i8| {
+    lua.set("draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: i8| {
         let mut realwidth = width/2;
         let mut realheight = height;
         if x + realwidth >= 192 {
@@ -49,7 +49,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
         }
     }));
 
-    lua.set("_draw_line", hlua::function5(|x1: i32, y1: i32, x2: i32, y2: i32, color: u8| {
+    lua.set("draw_line", hlua::function5(|x1: i32, y1: i32, x2: i32, y2: i32, color: u8| {
       for (x, y) in Bresenham::new((x1 as isize,y1 as isize),(x2 as isize,y2 as isize)) {
         if (x < 0 || x > 192) || (y < 0 || y > 144) {
           continue;
@@ -67,6 +67,9 @@ pub fn load_std(lua: &mut hlua::Lua) {
     //lua.set("_draw_circle", hlua::function4(|x: i32, y: i32, radius: i32, color: i8| {
 
     //}))
+
+    // Input
+    
 }
 
 #[test]
