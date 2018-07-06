@@ -36,7 +36,6 @@ Map:       96x72 8-bit cell maps
            0-31 maps
 Sprite:    96x72 4-bit pixel sheets
            0-63 sheets
-
 ```
 
 ### Sound Specs
