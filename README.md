@@ -59,10 +59,10 @@ _rotl
 _draw_rect _draw_line
 ```
 
-## Building
+## Testing
 This will change soon, but for right now:
 ```
-cargo run --bin bity-8 lua/file
+cargo run assets/test.lua
 ```
 
 ## TODO
