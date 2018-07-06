@@ -2,15 +2,15 @@
 trait Tilemap {
     fn new() -> Self;
 
-    fn from_tilemap(&tilemap: Tilemap) -> Self {
+    fn from_tilemap(tilemap: &Tilemap) -> Self {
 
     fn to_abstract_tilemap(&self) -> AbstractTilemap;
 
     fn to_raw_tilemap(&self) -> RawTilemap;
 
-    fn get_sprite_coordinates_at(x: u8, y: u8) -> (u8, u8);
+    fn get_sprite_coordinates_at(&self, x: u8, y: u8) -> Tile;
 
-    fn set_sprite_coordinates_at(x: u8, y: u8, tile: Tile);
+    fn set_sprite_coordinates_at(&mut self, x: u8, y: u8, tile: &Tile);
 }
 
 // Abstraction

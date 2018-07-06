@@ -3,7 +3,7 @@ trait Tile {
     fn new(sprite_x: u8, sprite_y: u8) -> Self;
 
     // Return copy of sprite stored at referenced coordinates from spritesheet
-    fn get_sprite(&spritesheet, Spritesheet) -> Sprite;
+    fn get_sprite(&self, spritesheet: &Spritesheet) -> Sprite;
 }
 
 // Abstraction

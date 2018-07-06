@@ -2,14 +2,14 @@
 trait Sprite {
     fn new -> Self;
 
-    fn from_sprite(&sprite: Sprite) -> Self;
+    fn from_sprite(sprite: &Sprite) -> Self;
 
     fn to_abstract_sprite(&self) -> AbstractSprite;
 
     fn to_raw_sprite(&self) -> RawSprite;
 
     // Copy sprite to framebuffer at coordinates (x, y)
-    fn copy_to(fb: &mut [u8], x: u8, y: u8);
+    fn copy_to(&self, fb: &mut [u8], x: u8, y: u8);
 }
 
 // Abstraction

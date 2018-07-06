@@ -2,13 +2,13 @@
 trait Spritesheet {
     fn new() -> Self;
 
-    fn from_spritesheet(&sheet: Spritesheet) -> Self;
+    fn from_spritesheet(sheet: &Spritesheet) -> Self;
 
     fn to_abstract_spritesheet(&self) -> AbstractSpritesheet;
 
     fn to_raw_spritesheet(&self) -> RawSpritesheet;
 
-    fn get_sprite_at(x: u8, y: u8) -> Sprite;
+    fn get_sprite_at(&self, x: u8, y: u8) -> Sprite;
 }
 
 // Abstraction
