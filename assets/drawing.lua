@@ -31,22 +31,22 @@ function _update()
    draw_circle(96,72,32,8)
    draw_circle(96,72,22,7)
    draw_line(96,72,rotx,roty,5)
-   if rotx == 0 then
-      if roty == 0 then
-         rotx = rotx + 1
+   if rotx <= 0 then
+      if roty <= 0 then
+         rotx = 1
       else
-         roty = roty - 1
+         roty = roty - 11
       end
-   elseif rotx == 192 then
-      if roty == 144 then
-         rotx = rotx - 1
+   elseif rotx >= 192 then
+      if roty >= 144 then
+         rotx = 191
       else
-         roty = roty + 1
+         roty = roty + 11
       end
-   elseif roty == 0 then
-      rotx = rotx + 1
-   elseif roty == 144 then
-      rotx = rotx - 1
+   elseif roty <= 0 then
+      rotx = rotx + 11
+   elseif roty >= 144 then
+      rotx = rotx - 11
    end
 end
 

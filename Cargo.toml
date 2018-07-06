@@ -20,7 +20,7 @@ bresenham = "0.1.1"
 
 [dependencies.sdl2]
 version = "0.31"
-features = ["image"]
+features = ["image", "gfx"]
 
 [[bin]]
 name = "bity-8"

@@ -9,8 +9,10 @@ use memory as mem;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
+use sdl2::gfx::framerate::FPSManager;
 use sdl2::Sdl;
 use std::collections::HashSet;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use std::thread;
 use std::time::Duration;
@@ -63,7 +65,7 @@ impl<'a> Emulator<'a> {
         // Measured in nano seconds.
         let fps = Duration::from_secs(1).checked_div(60).unwrap();
         let video_subsystem = self.sdl.video().unwrap();
-        let window = video_subsystem.window("BITY-8",
+        let mut window = video_subsystem.window("BITY-8",
                                             display::SCR_X*display::PIX_LEN,
                                             display::SCR_Y*display::PIX_LEN)
             .position_centered()
@@ -89,10 +91,18 @@ impl<'a> Emulator<'a> {
         // start sound
         for x in self.channels.iter() { x.device.resume(); }
 
+        let mut fps_mgr = FPSManager::new();
+        fps_mgr.set_framerate(60);
+        let mut timer = SystemTime::now();
+        let mut frames = 0;
+
         'mainloop: loop {
             // ----- start measuring time...
             use std::time::Instant;
             let now = Instant::now();
+
+            
+            //println!("FPS: {:?}", fps_mgr.get_framerate());
 
             // Handle sound first
             self.update_audio_memory();
@@ -116,6 +126,13 @@ impl<'a> Emulator<'a> {
             display::draw_screen(&mut texture);
             canvas.copy(&texture, None, None).unwrap();
             canvas.present();
+            frames += 1;
+
+            if SystemTime::now().duration_since(timer).expect("88 MPH").as_secs() == 1 {
+                canvas.window_mut().set_title(&format!("BITY-8 ({})", frames));
+                frames = 0;
+                timer = SystemTime::now();
+            }
 
             // ----- end measuring time...
             // TODO: put a match here.
