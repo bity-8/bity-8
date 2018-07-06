@@ -13,7 +13,7 @@ use memory as mem;
 const SAMPLES:   u32 = 256;
 const BITY_SAMP: f32 = 128f32;
 const SPS:       u32 = 240;   // samples per second, 60 per frame
-const AMPLIFIER: i16 = 10;
+const SOFTENER:  f32 = 4000f32;
 const PIANO_LEN: usize = 88;
 const MAX_VOLUME: usize = 16;
 
@@ -69,9 +69,8 @@ impl AudioCallback for Wave {
                 if r == -128 { -127 } else { r }
             } else { amp };
 
-            let amp = amp as i16 * AMPLIFIER / MAX_VOLUME as i16 * volume;
-            out[x as usize] = amp as f32 * AMPLIFIER as f32;
-            // result.push(amp as i16 * AMPLIFIER);
+            let amp = amp as i16 * volume;
+            out[x as usize] = amp as f32 / SOFTENER;
         }
 
         self.current_index += (SAMPLES as f32 % period / period * BITY_SAMP as f32) as usize;

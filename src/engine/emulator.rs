@@ -17,14 +17,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 use std::time::Duration;
 
-const LEFT_BTN: i8  = 1;
-const RIGHT_BTN: i8 = 2;
-const UP_BTN: i8    = 4;
-const DOWN_BTN: i8  = 8;
-const A_BTN: i8     = 16;
-const B_BTN: i8     = 32;
-const START_BTN: i8 = 64;
-const SELECT_BTN: i8 = -128;
+const LEFT_BTN: i8  = 0b0000_0001u8 as i8;
+const RIGHT_BTN: i8 = 0b0000_0010u8 as i8;
+const UP_BTN: i8    = 0b0000_0100u8 as i8;
+const DOWN_BTN: i8  = 0b0000_1000u8 as i8;
+const O_BTN: i8     = 0b0001_0000u8 as i8;
+const X_BTN: i8     = 0b0010_0000u8 as i8;
+const PLUS_BTN: i8  = 0b0100_0000u8 as i8;
+const MINUS_BTN: i8 = 0b1000_0000u8 as i8;
 
 pub struct Emulator<'a> {
     pub sdl: Sdl,
@@ -172,16 +172,16 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
                     hw_cfg[0] ^= RIGHT_BTN;
                 },
                 Keycode::Z => {
-                    hw_cfg[0] ^= A_BTN;
+                    hw_cfg[0] ^= O_BTN;
                 },
                 Keycode::X => {
-                    hw_cfg[0] ^= B_BTN;
+                    hw_cfg[0] ^= X_BTN;
                 },
                 Keycode::Backspace => {
-                    hw_cfg[0] ^= SELECT_BTN;
+                    hw_cfg[0] ^= MINUS_BTN;
                 },
                 Keycode::Return => {
-                    hw_cfg[0] ^= START_BTN;
+                    hw_cfg[0] ^= PLUS_BTN;
                 },
                 _ => {}
             }
@@ -202,16 +202,16 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
                     hw_cfg[0] ^= RIGHT_BTN;
                 },
                 Keycode::Z => {
-                    hw_cfg[0] ^= A_BTN;
+                    hw_cfg[0] ^= O_BTN;
                 },
                 Keycode::X => {
-                    hw_cfg[0] ^= B_BTN;
+                    hw_cfg[0] ^= X_BTN;
                 },
                 Keycode::Backspace => {
-                    hw_cfg[0] ^= SELECT_BTN;
+                    hw_cfg[0] ^= MINUS_BTN;
                 },
                 Keycode::Return => {
-                    hw_cfg[0] ^= START_BTN;
+                    hw_cfg[0] ^= PLUS_BTN;
                 },
                 _ => {}
          

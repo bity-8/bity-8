@@ -64,3 +64,12 @@ This will change soon, but for right now:
 ```
 cargo run --bin bity-8 lua/file
 ```
+
+## TODO
+This is for the developers.
+
+```
+TODO: make draw_rect more efficient than draw_line
+TODO: logo screen
+TODO: draw text, font in memory.
+```
