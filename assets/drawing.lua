@@ -10,6 +10,8 @@ end
 
 rotx = 0;
 roty = 96;
+delay = 0;
+circle = true;
 function _update()
    -- set the screen.
    for i=0, 192-1 do
@@ -24,12 +26,25 @@ function _update()
    draw_line(0,0,192,144,0)
    draw_line(0,143,192,0,3)
    draw_line(21,40,30,40,10)
-   draw_circle(96,72,72,12)
-   draw_circle(96,72,62,11)
-   draw_circle(96,72,52,10)
-   draw_circle(96,72,42,9)
-   draw_circle(96,72,32,8)
-   draw_circle(96,72,22,7)
+   if circle and delay <= 60 then
+      for i=0, 20 do
+         x = math.random(192) 
+         y = math.random(144)
+         r = math.random(30)
+         c = math.random(16)
+         draw_circle(x,y,r,c)
+         circle = false
+      end
+   elseif delay <= 60 then
+      for i=0, 50 do
+         draw_rect(math.random(192), math.random(144), math.random(192), math.random(144), math.random(16))
+         circle = true
+      end
+   else
+      delay = 0
+   end
+   delay = delay + 1
+   --draw_circle(127, 144, 29, 6)
    draw_line(96,72,rotx,roty,5)
    if rotx <= 0 then
       if roty <= 0 then

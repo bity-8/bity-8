@@ -31,22 +31,9 @@ pub fn load_std(lua: &mut hlua::Lua) {
     //lua.set("_rotl", hlua::function2(|val: i32, amt: i32|))
 
     // Drawing
-    lua.set("draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: i8| {
-        let mut realwidth = width/2;
-        let mut realheight = height;
-        if x + realwidth >= 192 {
-            realwidth = 192/2 - x/2;
-        }
-        if y + realheight >= 144 {
-            realheight = 144 - y;
-        }
-        if realheight == 0 || realwidth == 0 { return; };
-        for i in y..(y+realheight) {
-            // Calculation:
-            // 0x40400 (buffer addr)
-            // x/2 (pixels are stored in nibbles)
-            // 192/2 * i (calculate row offset)
-            mem::mset_w(get_buffer_loc(x as isize,i as isize), realwidth as usize, color | (color << 4));
+    lua.set("draw_rect", hlua::function5(|x: i32, y: i32, width: i32, height: i32, color: u8| {
+        for i in y..(y+height) {
+            draw_horiz_line(x, x + width, i, color);
         }
     }));
 
@@ -146,7 +133,7 @@ fn in_bounds(x:i32, y:i32) -> bool {
 fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   let mut x_min = cmp::max(cmp::min(x1, x2), 0);
   let mut x_max = cmp::min(cmp::max(x1, x2), 193);
-  if !in_bounds(x_min, x_max) && !in_bounds(0, y) {
+  if x_min < 0 || x_max > 192 || y < 0 || y > 144 {
     return;
   }
   let length = x_min - x_max;
@@ -159,11 +146,13 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   }
   if (x_max & 1) == 0 {
     // Need to set left pixel in screen byte
-    let mut pixel = mem::peek_u(get_buffer_loc(x_max as isize, y as isize));
+    let mut pixel = mem::peek_u(get_buffer_loc(x_max as isize, y as isize) - 1);
     pixel = (pixel & 0x0F) | (color << 4);
-    mem::poke_wu(get_buffer_loc(x_max as isize, y as isize), pixel);
+    mem::poke_wu(get_buffer_loc(x_max as isize, y as isize) - 1, pixel);
     x_max -= 1;
   }
+  // TODO: Figure out why this is needed.
+  if x_max/2 - x_min/2 < 1 { return; }
   mem::mset_wu(get_buffer_loc(x_min as isize, y as isize), ((x_max/2 - x_min/2)) as usize, color | (color << 4));
 }
 
