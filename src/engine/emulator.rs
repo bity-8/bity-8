@@ -15,15 +15,14 @@ use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
 
-const UP_BTN: i8 = 1;
-const DOWN_BTN: i8 = 2;
-const LEFT_BTN: i8 = 4;
-const RIGHT_BTN: i8 = 8;
-const A_BTN: i8 = 16;
-const B_BTN: i8 = 32;
+const LEFT_BTN: i8  = 1;
+const RIGHT_BTN: i8 = 2;
+const UP_BTN: i8    = 4;
+const DOWN_BTN: i8  = 8;
+const A_BTN: i8     = 16;
+const B_BTN: i8     = 32;
 const START_BTN: i8 = 64;
 const SELECT_BTN: i8 = -128;
-
 
 pub struct Emulator<'a> {
     pub sdl: Sdl,
@@ -41,24 +40,14 @@ impl<'a> Emulator<'a> {
         for i in 0..4 {
             notes[i*4+0] = notes[i*4+2]; // move next to current note.
             notes[i*4+1] = notes[i*4+3]; // move next to current note.
-
-            // And, let's not zero out the current note in memory :).
-            // But we will play the current note now.
-            // Remember that the top bit is "reserved for future use."
-            let note       =  notes[i*4+1];
-            let instrument = (notes[i*4] >> 4) & 0b0111i8;
-            let volume     =  notes[i*4]       & 0b1111i8;
-
-            println!("c: {}, i: {}, vol: {}, not: {}", i, instrument, volume, note);
-            self.channels[i].play_note(note as usize, instrument as usize, volume as usize);
         }
     }
 
     pub fn new() -> Emulator<'a> {
         let mut sdl = sdl2::init().unwrap();
         let channels = [
-            audio::Channel::new(&mut sdl), audio::Channel::new(&mut sdl),
-            audio::Channel::new(&mut sdl), audio::Channel::new(&mut sdl),
+            audio::Channel::new(&mut sdl, 0), audio::Channel::new(&mut sdl, 1),
+            audio::Channel::new(&mut sdl, 2), audio::Channel::new(&mut sdl, 3),
         ];
 
         let l = lua::create_lua();
@@ -149,7 +138,7 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
     let old_keys = &prev_keys - &keys;
 
     if !new_keys.is_empty() || !old_keys.is_empty() {
-        let hw_cfg = mem::get_area(mem::OFF_HARD_INP);
+        let hw_cfg = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_INP);
         
         for key in old_keys {
             match key {
