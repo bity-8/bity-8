@@ -21,10 +21,16 @@ function _update()
    end
 
    --_mset(0x40400 + 0xd80, 0x1b00, 0)
-   _draw_line(0,0,192,144,0)
-   _draw_line(0,143,192,0,3)
-   _draw_line(21,40,30,40,10)
-   _draw_line(96,72,rotx,roty,5)
+   draw_line(0,0,192,144,0)
+   draw_line(0,143,192,0,3)
+   draw_line(21,40,30,40,10)
+   draw_circle(96,72,72,12)
+   draw_circle(96,72,62,11)
+   draw_circle(96,72,52,10)
+   draw_circle(96,72,42,9)
+   draw_circle(96,72,32,8)
+   draw_circle(96,72,22,7)
+   draw_line(96,72,rotx,roty,5)
    if rotx == 0 then
       if roty == 0 then
          rotx = rotx + 1

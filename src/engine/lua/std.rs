@@ -50,23 +50,30 @@ pub fn load_std(lua: &mut hlua::Lua) {
     }));
 
     lua.set("draw_line", hlua::function5(|x1: i32, y1: i32, x2: i32, y2: i32, color: u8| {
-      for (x, y) in Bresenham::new((x1 as isize,y1 as isize),(x2 as isize,y2 as isize)) {
-        if (x < 0 || x > 192) || (y < 0 || y > 144) {
-          continue;
-        }
-        let mut pixel_current = mem::peek(get_buffer_loc(x,y)) as u8;
-        if (x & 1) == 0 {
-          pixel_current = (pixel_current & 0x0F) | (color << 4);
-        } else {
-          pixel_current = (pixel_current & 0xF0) | color;
-        }
-        mem::poke_w(get_buffer_loc(x,y), pixel_current as i8);
-      }
+      draw_line(x1,y1,x2,y2,color);
     }));
 
-    //lua.set("_draw_circle", hlua::function4(|x: i32, y: i32, radius: i32, color: i8| {
+    lua.set("draw_dot", hlua::function3(|x:i32,y:i32,color:u8| {
+      set_point(x,y,color);
+    }));
 
-    //}))
+    lua.set("draw_circle", hlua::function4(|x0: i32, y0: i32, radius: i32, color: u8| {
+      // let mut theta = 0f32;
+      // let step = 0.05;
+
+      // while theta <= 360f32 {
+      //   let x2 = x as f32 + (radius as f32 * theta.cos());
+      //   let y2 = y as f32 + (radius as f32 * theta.sin());
+      //   draw_line(x,y,x2 as i32,y2 as i32,color);
+      //   theta += step;
+      for y in -radius..radius {
+        for x in -radius..radius {
+          if x*x + y*y <= radius*radius {
+            set_point(x0 + x, y0 + y, color);
+          }
+        }
+      }
+    }));
 
     // Input
     lua.set("btn_reg", hlua::function0(|| -> i8 {
@@ -90,6 +97,25 @@ pub fn load_std(lua: &mut hlua::Lua) {
 
 fn get_buffer_loc(x: isize, y: isize) -> usize{
   (0x40400 + x/2 + (192/2 * y)) as usize
+}
+
+fn draw_line(x1:i32,y1:i32,x2:i32,y2:i32,color:u8) {
+  for (x, y) in Bresenham::new((x1 as isize,y1 as isize),(x2 as isize,y2 as isize)) {
+        if (x < 0 || x > 192) || (y < 0 || y > 144) {
+          continue;
+        }
+        set_point(x as i32,y as i32,color);
+      }
+}
+
+fn set_point(x:i32,y:i32,color:u8) {
+  let mut pixel_current = mem::peek(get_buffer_loc(x as isize,y as isize)) as u8;
+  if (x & 1) == 0 {
+    pixel_current = (pixel_current & 0x0F) | (color << 4);
+  } else {
+    pixel_current = (pixel_current & 0xF0) | color;
+  }
+  mem::poke_w(get_buffer_loc(x as isize,y as isize), pixel_current as i8);
 }
 
 #[test]
