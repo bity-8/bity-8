@@ -34,8 +34,11 @@ pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
 pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // Hardware Config Locations
-pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Multicart
+pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Pallete
 pub const OFF_HARD_INP: MemLoc = (0x31..0x32); // Input
+
+// Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
+pub const OFF_HARD_NOT: MemLoc = (0x32..0x42);
 
 // private worker functions
 fn add_mems(r1: MemLoc, r2: MemLoc) -> MemLoc {
@@ -115,9 +118,19 @@ pub fn peek(pos: usize) -> i8 {
     }
 }
 
+pub fn peek_u(pos: usize) -> u8 {
+    if pos < CART_LEN {
+        unsafe { MEM[pos] as u8 }
+    } else {
+        0u8
+    }
+}
+
 // for short/writable areas.
 pub fn poke_w(pos: usize, val: i8)  { poke(pos, val, LOC_WRITABLE); }
+pub fn poke_wu(pos: usize, val: u8) { poke(pos, val as i8, LOC_WRITABLE); }
 pub fn mset_w(pos: usize, len: usize, val: i8) { mset(pos, len, val, LOC_WRITABLE); }
+pub fn mset_wu(pos: usize, len: usize, val: u8) { mset(pos, len, val as i8, LOC_WRITABLE); }
 pub fn mcpy_w(dest: usize, pos: usize, len: usize) { mcpy(dest, pos, len, LOC_WRITABLE); }
 
 pub fn poke_a(pos: usize, val: i8)  { poke(pos, val, LOC_ALL); }

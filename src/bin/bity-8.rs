@@ -22,13 +22,13 @@ fn main() {
         // Code Initialization.
         lua::load_file(Path::new(&args[1]), &mut em.lua);
 
-        for i in 0..5*90 {
-            em.channels[0].play_note(i, 0, 15);
-            em.channels[1].play_note(i, 1, 15);
-            em.channels[2].play_note(i, 2, 15);
-            em.channels[3].play_note(i, 3, 15);
-            for x in em.channels.iter() { x.device.resume(); }
-        }
+        //for i in 0..5*90 {
+            //em.channels[0].play_note(i, 0, 15);
+            //em.channels[1].play_note(i, 1, 15);
+            //em.channels[2].play_note(i, 2, 15);
+            //em.channels[3].play_note(i, 3, 15);
+            //for x in em.channels.iter() { x.device.resume(); }
+        //}
         
         // Game loop.
         em.run();

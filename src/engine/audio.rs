@@ -5,13 +5,14 @@ extern crate rand;
 use audio::rand::prelude::*;
 
 use sdl2::audio::AudioSpecDesired;
-use sdl2::audio::AudioQueue;
+use sdl2::audio::AudioDevice;
+use sdl2::audio::AudioCallback;
 use self::sdl2::Sdl;
 use memory as mem;
 
-const SAMPLES:   u32 = 1024;
+const SAMPLES:   u32 = 256;
 const BITY_SAMP: f32 = 128f32;
-const SPS:       u32 = 60;   // samples per second
+const SPS:       u32 = 240;   // samples per second, 60 per frame
 const AMPLIFIER: i16 = 10;
 const PIANO_LEN: usize = 88;
 const MAX_VOLUME: usize = 16;
@@ -38,17 +39,26 @@ const INSTRUMENTS: [mem::MemLoc; INSTRUMENTS_LEN] =
     mem::LOC_INS5, mem::LOC_INS6, mem::LOC_INS7, mem::LOC_INS8,
 ];
 
-pub struct Channel {
-    pub device: AudioQueue<i16>,
-    pub current_index: usize,
+pub struct Wave {
+    current_index: usize,
+    channel: usize
 }
 
-impl Channel {
-    pub fn play_note(&mut self, note: usize, wave_num: usize, volume: usize) {
+impl AudioCallback for Wave {
+    type Channel = f32;
+
+    fn callback(&mut self, out: &mut [f32]) {
+        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_NOT);
+
+        let note       = ( notes[self.channel*4+1]               ) as usize;
+        let instrument = ((notes[self.channel*4] >> 4) & 0b0111i8) as usize;
+        let volume     = ( notes[self.channel*4]       & 0b1111i8) as usize;
+
+        //println!("c: {}, i: {}, vol: {}, not: {}", self.channel, instrument, volume, note);
+
         let volume = (volume % MAX_VOLUME) as i16;
-        let wave_data = mem::get_area(INSTRUMENTS[wave_num % INSTRUMENTS_LEN].clone());
+        let wave_data = mem::get_area(INSTRUMENTS[instrument % INSTRUMENTS_LEN].clone());
         let period = ((SPS * SAMPLES) / PIANO_FREQS_INT[note % PIANO_LEN]) as f32;
-        let mut result = Vec::new();
 
         // next: cache the last index.
         for x in 0..SAMPLES {
@@ -60,16 +70,21 @@ impl Channel {
             } else { amp };
 
             let amp = amp as i16 * AMPLIFIER / MAX_VOLUME as i16 * volume;
-            result.push(amp as i16 * AMPLIFIER);
+            out[x as usize] = amp as f32 * AMPLIFIER as f32;
+            // result.push(amp as i16 * AMPLIFIER);
         }
 
         self.current_index += (SAMPLES as f32 % period / period * BITY_SAMP as f32) as usize;
         self.current_index %= 128usize;
-
-        self.device.queue(&result);
     }
+}
 
-    pub fn new(sdl_context: &mut Sdl) -> Channel {
+pub struct Channel {
+    pub device: AudioDevice<Wave>,
+}
+
+impl Channel {
+    pub fn new(sdl_context: &mut Sdl, channel_num: usize) -> Channel {
         let audio_subsystem = sdl_context.audio().unwrap();
 
         let desired_spec = AudioSpecDesired {
@@ -78,12 +93,21 @@ impl Channel {
             samples: Some(SAMPLES as u16)
         };
 
-        let device = audio_subsystem.open_queue::<i16, _>(None, &desired_spec).unwrap();
+        audio_subsystem.open_queue::<i16, _>(None, &desired_spec).unwrap();
+        let device = audio_subsystem.open_playback(None, &desired_spec, |spec| {
+            // Show obtained AudioSpec
+            println!("{:?}", spec);
+
+            // initialize the audio callback
+            Wave {
+                current_index: 0,
+                channel: channel_num % 4
+            }
+        }).unwrap();
         // println!("{:?}", device.spec());
 
         Channel {
             device: device,
-            current_index: 0,
         }
     }
 }
