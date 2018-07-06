@@ -54,7 +54,7 @@ impl AudioCallback for Wave {
         let instrument = ((notes[self.channel*4] >> 4) & 0b0111i8) as usize;
         let volume     = ( notes[self.channel*4]       & 0b1111i8) as usize;
 
-        println!("c: {}, i: {}, vol: {}, not: {}", self.channel, instrument, volume, note);
+        //println!("c: {}, i: {}, vol: {}, not: {}", self.channel, instrument, volume, note);
 
         let volume = (volume % MAX_VOLUME) as i16;
         let wave_data = mem::get_area(INSTRUMENTS[instrument % INSTRUMENTS_LEN].clone());
