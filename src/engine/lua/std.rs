@@ -115,7 +115,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
 fn get_buffer_loc(x: isize, y: isize) -> usize{
   let x = cmp::min(192, x);
   let y = cmp::min(144, y);
-  (mem::LOC_SCRE.start + x/2 + (192/2 * y)) as usize
+  mem::LOC_SCRE.start + x as usize /2 + (192/2 * y as usize)
 }
 
 fn draw_line(x1:i32,y1:i32,x2:i32,y2:i32,color:u8) {
