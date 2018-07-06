@@ -5,5 +5,3 @@ pub mod display;
 pub mod emulator;
 pub mod lua;
 pub mod memory;
-pub mod palette;
-pub mod spritesheet;
