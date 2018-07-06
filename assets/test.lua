@@ -24,7 +24,8 @@ inst = 0x1A
 loop_ind = 0
 function _update()
    loop_ind = loop_ind + 1
-   if BitAND(inp, 16) > 0 then
+
+   if btn(4) then
       inst = loop_ind % 4 * 16 + 0xA
    end
 
@@ -42,12 +43,12 @@ function _update()
 
    -- set the screen.
    for i=0, 192-1 do
-      _poke(0x40400 + i, math.floor(math.random() * 0x100))
+      draw_line(i,0,i,144,math.floor(math.random() * 0x100))
    end
 
-   for j=0, 144-1 do
-      _mcpy(0x40400 + 0x60 * j, 0x40400, 0x60)
-   end
-
-   _mset(0x40400 + 0xd80, 0x1b00, 0)
+   --for j=0, 144-1 do
+   --   _mcpy(0x40400 + 0x60 * j, 0x40400, 0x60)
+   --end
+   draw_rect(0,36,192,72,0)
+   --_mset(0x40400 + 0xd80, 0x1b00, 0)
 end

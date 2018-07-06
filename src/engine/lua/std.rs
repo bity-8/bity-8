@@ -146,14 +146,12 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   }
   if (x_max & 1) == 0 {
     // Need to set left pixel in screen byte
-    let mut pixel = mem::peek_u(get_buffer_loc(x_max as isize, y as isize) - 1);
+    let mut pixel = mem::peek_u(get_buffer_loc(x_max as isize, y as isize));
     pixel = (pixel & 0x0F) | (color << 4);
-    mem::poke_wu(get_buffer_loc(x_max as isize, y as isize) - 1, pixel);
-    x_max -= 1;
+    mem::poke_wu(get_buffer_loc(x_max as isize, y as isize), pixel);
   }
-  // TODO: Figure out why this is needed.
-  if x_max/2 - x_min/2 < 1 { return; }
-  mem::mset_wu(get_buffer_loc(x_min as isize, y as isize), ((x_max/2 - x_min/2)) as usize, color | (color << 4));
+  let length = f32::ceil(x_max as f32/2.0 - x_min as f32/2.0) as usize;
+  mem::mset_wu(get_buffer_loc(x_min as isize, y as isize), length, color | (color << 4));
 }
 
 fn set_point(x:i32,y:i32,color:u8) {
