@@ -23,23 +23,21 @@ end
 inst = 0x1A
 loop_ind = 0
 function _update()
-   inp = _peek(0x40031)
-
    loop_ind = loop_ind + 1
    if BitAND(inp, 16) > 0 then
       inst = loop_ind % 4 * 16 + 0xA
    end
 
-   if BitAND(inp, 1) > 0 then _poke(0x40035, 0x40) _poke(0x40034, inst)
+   if btn(0) then _poke(0x40035, 0x40) _poke(0x40034, inst)
    else _poke(0x40034, 0x00) end -- chan 1
 
-   if BitAND(inp, 2) > 0 then _poke(0x40039, 0x42) _poke(0x40038, inst)
+   if btn(1) then _poke(0x40039, 0x42) _poke(0x40038, inst)
    else _poke(0x40038, 0x00) end -- chan 2
 
-   if BitAND(inp, 4) > 0 then _poke(0x4003D, 0x44) _poke(0x4003C, inst)
+   if btn(2) then _poke(0x4003D, 0x44) _poke(0x4003C, inst)
    else _poke(0x4003C, 0x00) end -- chan 3
 
-   if BitAND(inp, 8) > 0 then _poke(0x40041, 0x47) _poke(0x40040, inst)
+   if btn(3) then _poke(0x40041, 0x47) _poke(0x40040, inst)
    else _poke(0x40040, 0x00) end -- chan 4
 
    -- set the screen.

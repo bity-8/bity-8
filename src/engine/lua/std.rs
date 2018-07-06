@@ -45,7 +45,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
             // 0x40400 (buffer addr)
             // x/2 (pixels are stored in nibbles)
             // 192/2 * i (calculate row offset)
-            mem::mset_w(get_buffer_loc(x,i), realwidth as usize, color | (color << 4));
+            mem::mset_w(get_buffer_loc(x as isize,i as isize), realwidth as usize, color | (color << 4));
         }
     }));
 
@@ -69,9 +69,23 @@ pub fn load_std(lua: &mut hlua::Lua) {
     //}))
 
     // Input
-    lua.set("btn", hlua::function0(||{
-      mem::peek(())
-    }))
+    lua.set("btn_reg", hlua::function0(|| -> i8 {
+      mem::peek(0x40031)
+    }));
+    lua.set("btn", hlua::function1(|button: i32| -> bool {
+      let register = mem::peek(0x40031);
+      match button {
+        0 => (register & 0b00000001) > 0,
+        1 => (register & 0b00000010) > 0,
+        2 => (register & 0b00000100) > 0,
+        3 => (register & 0b00001000) > 0,
+        4 => (register & 0b00010000) > 0,
+        5 => (register & 0b00100000) > 0,
+        6 => (register & 0b01000000) > 0,
+        7 => (register & 0b10000000) > 0,
+        _ => false
+      }
+    }));
 }
 
 fn get_buffer_loc(x: isize, y: isize) -> usize{
