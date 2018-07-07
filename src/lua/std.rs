@@ -143,17 +143,17 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
     // Need to set right pixel in screen byte
     let mut pixel = mem::peek(get_buffer_loc(x_min as isize, y as isize));
     pixel = (pixel & 0xF0) | color;
-    mem::poke_wu(get_buffer_loc(x_min as isize, y as isize), pixel);
+    mem::poke_w(get_buffer_loc(x_min as isize, y as isize), pixel);
     x_min += 1;
   }
   if (x_max & 1) == 0 {
     // Need to set left pixel in screen byte
     let mut pixel = mem::peek(get_buffer_loc(x_max as isize, y as isize));
     pixel = (pixel & 0x0F) | (color << 4);
-    mem::poke_wu(get_buffer_loc(x_max as isize, y as isize), pixel);
+    mem::poke_w(get_buffer_loc(x_max as isize, y as isize), pixel);
   }
   let length = f32::ceil(x_max as f32/2.0 - x_min as f32/2.0) as usize;
-  mem::mset_wu(get_buffer_loc(x_min as isize, y as isize), length, color | (color << 4));
+  mem::mset_w(get_buffer_loc(x_min as isize, y as isize), length, color | (color << 4));
 }
 
 fn set_point(x:i32,y:i32,color:u8) {
@@ -164,7 +164,7 @@ fn set_point(x:i32,y:i32,color:u8) {
     } else {
       pixel_current = (pixel_current & 0xF0) | color;
     }
-    mem::poke_wu(get_buffer_loc(x as isize,y as isize), pixel_current);
+    mem::poke_w(get_buffer_loc(x as isize,y as isize), pixel_current);
   }
 }
 

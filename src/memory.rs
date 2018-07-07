@@ -121,9 +121,7 @@ pub fn peek(pos: usize) -> u8 {
 
 // for short/writable areas.
 pub fn poke_w(pos: usize, val: u8)  { poke(pos, val, LOC_WRITABLE); }
-pub fn poke_wu(pos: usize, val: u8) { poke(pos, val as u8, LOC_WRITABLE); }
 pub fn mset_w(pos: usize, len: usize, val: u8) { mset(pos, len, val, LOC_WRITABLE); }
-pub fn mset_wu(pos: usize, len: usize, val: u8) { mset(pos, len, val as u8, LOC_WRITABLE); }
 pub fn mcpy_w(dest: usize, pos: usize, len: usize) { mcpy(dest, pos, len, LOC_WRITABLE); }
 
 pub fn poke_a(pos: usize, val: u8)  { poke(pos, val, LOC_ALL); }
