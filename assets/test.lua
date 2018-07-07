@@ -1,6 +1,6 @@
 -- A basic drawing thing.
 -- set the palette.
-colors = {255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0, 0, 255, 255,
+colors = {255, 0, 0, 255, 255, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0, 0, 255, 255,
 255, 0, 255, 255, 255, 255, 100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 100, 100, 100,
 100, 100, 100, 0, 100, 100, 100, 0, 50, 50, 50}
 
@@ -30,5 +30,13 @@ function _update()
       draw_line(i,0,i,144,math.floor(math.random() * 0x100))
    end
 
-   draw_rect(0,36,192,72,0)
+   draw_rect(0,36,192,72,3)
+
+   -- draw font to the screen, just 'cause :P.
+   for i=0, 96*72/2 do
+      local fnt_loc = 0x4E000 + i
+      local scr_loc = 0x40400 + math.floor(i / 48) * 96 + i%48
+      local val = _peek(fnt_loc)
+      _poke(scr_loc, val)
+   end
 end
