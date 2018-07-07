@@ -3,3 +3,9 @@ members = [
     "bity-8",
     "bity-8-tools",
 ]
+
+authors = [
+  "MikahJC <mikah.chapman@gmail.com>",
+  "Alan Morgan <alanxoc3@gmail.com>",
+  "Josh Backstein <josh.backstein@gmail.com"
+]

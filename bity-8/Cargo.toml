@@ -1,11 +1,6 @@
 [package]
 name = "bity-8"
 version = "0.1.0"
-authors = [
-  "MikahJC <mikah.chapman@gmail.com>",
-  "Alan Morgan <alanxoc3@gmail.com>",
-  "Josh Backstein <josh.backstein@gmail.com"
-]
 publish = false
 
 [lib]
