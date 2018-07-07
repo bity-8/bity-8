@@ -48,7 +48,7 @@ impl AudioCallback for Wave {
     type Channel = f32;
 
     fn callback(&mut self, out: &mut [f32]) {
-        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_NOT);
+        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_NOTES);
 
         let note       = ( notes[self.channel*4+1]               ) as usize;
         let instrument = ((notes[self.channel*4] >> 4) & 0b0111u8) as usize;

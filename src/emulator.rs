@@ -36,7 +36,7 @@ pub struct Emulator<'a> {
 impl<'a> Emulator<'a> {
     // Reads the memory, plays the note, updates memory.
     pub fn update_audio_memory(&mut self) {
-        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_NOT);
+        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_NOTES);
 
         // 2 notes per channel. 2 bytes per note. 4 channels. So... 16 bytes.
         for i in 0..4 {
@@ -155,7 +155,7 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
     let old_keys = &prev_keys - &keys;
 
     if !new_keys.is_empty() || !old_keys.is_empty() {
-        let hw_cfg = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_INP);
+        let hw_cfg = mem::get_sub_area(mem::LOC_HARD, mem::OFF_INPUT);
         
         for key in old_keys {
             match key {
@@ -218,7 +218,7 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
             }
         }
     
-    //println!("Register: {:08b}", mem::get_area(mem::OFF_HARD_INP)[0]);
+    //println!("Register: {:08b}", mem::get_area(mem::OFF_INPUT)[0]);
     }
     return keys;
 }

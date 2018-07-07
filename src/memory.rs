@@ -7,7 +7,7 @@ pub type MemLoc = Range<usize>;
 pub const CART_LEN : usize = 0x50000; // End of cartridge
 static mut MEM: Memory = [0; CART_LEN];
 
-// Global Memory Constants
+// --- Global Memory Constants ---
 pub const LOC_CART: MemLoc = (0x00000..0x40000); // Cartridge
 pub const LOC_HARD: MemLoc = (0x40000..0x40400); // Hardware Config
 pub const LOC_SCRE: MemLoc = (0x40400..0x43A00); // Screen Buffer
@@ -19,7 +19,29 @@ pub const LOC_SAVE: MemLoc = (0x4ED80..0x4F180); // Save
 pub const LOC_EMPT: MemLoc = (0x4F180..0x4F800); // Empty
 pub const LOC_MULT: MemLoc = (0x4F800..0x50000); // Multicart
 
-// 8 Instruments, This could be useful.
+// -- Global helpers that may be useful ---
+pub const LOC_ALL:        MemLoc = (0x00000..0x50000);
+pub const LOC_REBOOTABLE: MemLoc = (0x00000..0x4F800); // Memory that gets reset
+pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
+pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
+
+// --- Cartridge locations ---
+pub const OFF_MAGIC_NUM:   MemLoc = (0x00..0x05);
+pub const OFF_MAJOR:       MemLoc = (0x05..0x06);
+pub const OFF_MINOR:       MemLoc = (0x06..0x07);
+// This section is prone to change in future versions.
+pub const OFF_SPRITE_DATA: MemLoc = (0x07..0x0A);
+pub const OFF_TILE_DATA:   MemLoc = (0x0A..0x0D);
+pub const OFF_AUDIO_DATA:  MemLoc = (0x0D..0x10);
+pub const OFF_RESERVED:    MemLoc = (0x10..0x20);
+
+// --- Hardware Config Locations ---
+pub const OFF_PALETTE: MemLoc = (0x00..0x30); // Pallete
+pub const OFF_INPUT:   MemLoc = (0x31..0x32); // Input
+// Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
+pub const OFF_NOTES:   MemLoc = (0x32..0x42);
+
+// --- 8 Instruments ---
 pub const OFF_INS1: MemLoc = (0x000..0x080);
 pub const OFF_INS2: MemLoc = (0x080..0x100);
 pub const OFF_INS3: MemLoc = (0x100..0x180);
@@ -28,18 +50,6 @@ pub const OFF_INS5: MemLoc = (0x200..0x280);
 pub const OFF_INS6: MemLoc = (0x280..0x300);
 pub const OFF_INS7: MemLoc = (0x300..0x380);
 pub const OFF_INS8: MemLoc = (0x380..0x400);
-
-pub const LOC_ALL:        MemLoc = (0x00000..0x50000);
-pub const LOC_REBOOTABLE: MemLoc = (0x00000..0x4F800); // Memory that gets reset
-pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
-pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
-
-// Hardware Config Locations
-pub const OFF_HARD_PAL: MemLoc = (0x00..0x30); // Pallete
-pub const OFF_HARD_INP: MemLoc = (0x31..0x32); // Input
-
-// Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
-pub const OFF_HARD_NOT: MemLoc = (0x32..0x42);
 
 // private worker functions
 fn add_mems(r1: MemLoc, r2: MemLoc) -> MemLoc {

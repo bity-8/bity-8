@@ -13,7 +13,7 @@ pub const PIX_LEN: u32 = 2; // the size for each pixel.
 // Does the obvious, draws the screen to the canvas.
 // This could be threaded maybe.
 pub fn draw_screen(texture: &mut Texture) {
-    let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_PAL);
+    let pal = mem::get_sub_area(mem::LOC_HARD, mem::OFF_PALETTE);
     let mut colors = [Color::RGB(0, 0, 0); 16];
 
     for i in 0..16 {

@@ -94,11 +94,11 @@ pub fn load_std(lua: &mut hlua::Lua) {
     // Input, for this, the integer type shouldn't matter
     // In fact, maybe (not sure), all integers should be 32 bit for the std functions.
     lua.set("btn_reg", hlua::function0(|| -> i32 {
-      mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start) as i32
+      mem::peek(mem::LOC_HARD.start + mem::OFF_INPUT.start) as i32
     }));
 
     lua.set("btn", hlua::function1(|button: i32| -> bool {
-      let register = mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start);
+      let register = mem::peek(mem::LOC_HARD.start + mem::OFF_INPUT.start);
       match button {
         0 => (register & 0b00000001) > 0,
         1 => (register & 0b00000010) > 0,
