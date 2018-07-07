@@ -33,7 +33,7 @@ function _update()
    draw_rect(0,36,192,72,3)
 
    -- draw font to the screen, just 'cause :P.
-   for i=0, 96*72/2 do
+   for i=0, 96*72/2-1 do -- -1 because lua is inclusive
       local fnt_loc = 0x4E000 + i
       local scr_loc = 0x40400 + math.floor(i / 48) * 96 + i%48
       local val = _peek(fnt_loc)
