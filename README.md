@@ -72,4 +72,5 @@ This is for the developers.
 TODO: make draw_rect more efficient than draw_line
 TODO: logo screen
 TODO: draw text, font in memory.
+TODO: error messages (wait till the project is more stable though).
 ```
