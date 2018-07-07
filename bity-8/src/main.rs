@@ -22,10 +22,9 @@ fn main() {
 
         // Code Initialization.
         cartridge::open(Path::new(&args[1]));
-        let code = cartridge::get_code_string();
 
-        // In theory, you should only pass it the section that has your code.
-        // Well, maybe it should read from a byte array instead.
+        // Evaluate the code.
+        let code = cartridge::get_code_string();
         lua::load_code(&code, &mut em.lua);
 
         // Game loop.
