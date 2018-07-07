@@ -91,13 +91,14 @@ pub fn load_std(lua: &mut hlua::Lua) {
       }
     }));
 
-    // Input
-    lua.set("btn_reg", hlua::function0(|| -> i8 {
-      mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start)
+    // Input, for this, the integer type shouldn't matter
+    // In fact, maybe (not sure), all integers should be 32 bit for the std functions.
+    lua.set("btn_reg", hlua::function0(|| -> i32 {
+      mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start) as i32
     }));
 
     lua.set("btn", hlua::function1(|button: i32| -> bool {
-      let register = mem::peek_u(mem::LOC_HARD.start + mem::OFF_HARD_INP.start);
+      let register = mem::peek(mem::LOC_HARD.start + mem::OFF_HARD_INP.start);
       match button {
         0 => (register & 0b00000001) > 0,
         1 => (register & 0b00000010) > 0,
@@ -140,14 +141,14 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   let length = x_min - x_max;
   if (x_min & 1) == 1 {
     // Need to set right pixel in screen byte
-    let mut pixel = mem::peek_u(get_buffer_loc(x_min as isize, y as isize));
+    let mut pixel = mem::peek(get_buffer_loc(x_min as isize, y as isize));
     pixel = (pixel & 0xF0) | color;
     mem::poke_wu(get_buffer_loc(x_min as isize, y as isize), pixel);
     x_min += 1;
   }
   if (x_max & 1) == 0 {
     // Need to set left pixel in screen byte
-    let mut pixel = mem::peek_u(get_buffer_loc(x_max as isize, y as isize));
+    let mut pixel = mem::peek(get_buffer_loc(x_max as isize, y as isize));
     pixel = (pixel & 0x0F) | (color << 4);
     mem::poke_wu(get_buffer_loc(x_max as isize, y as isize), pixel);
   }
@@ -157,7 +158,7 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
 
 fn set_point(x:i32,y:i32,color:u8) {
   if in_bounds(x,y) {
-    let mut pixel_current = mem::peek_u(get_buffer_loc(x as isize,y as isize));
+    let mut pixel_current = mem::peek(get_buffer_loc(x as isize,y as isize));
     if (x & 1) == 0 {
       pixel_current = (pixel_current & 0x0F) | (color << 4);
     } else {

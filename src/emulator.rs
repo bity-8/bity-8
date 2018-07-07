@@ -17,14 +17,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 use std::time::Duration;
 
-const LEFT_BTN: i8  = 0b0000_0001u8 as i8;
-const RIGHT_BTN: i8 = 0b0000_0010u8 as i8;
-const UP_BTN: i8    = 0b0000_0100u8 as i8;
-const DOWN_BTN: i8  = 0b0000_1000u8 as i8;
-const O_BTN: i8     = 0b0001_0000u8 as i8;
-const X_BTN: i8     = 0b0010_0000u8 as i8;
-const PLUS_BTN: i8  = 0b0100_0000u8 as i8;
-const MINUS_BTN: i8 = 0b1000_0000u8 as i8;
+const LEFT_BTN:  u8 = 0b0000_0001u8;
+const RIGHT_BTN: u8 = 0b0000_0010u8;
+const UP_BTN:    u8 = 0b0000_0100u8;
+const DOWN_BTN:  u8 = 0b0000_1000u8;
+const O_BTN:     u8 = 0b0001_0000u8;
+const X_BTN:     u8 = 0b0010_0000u8;
+const PLUS_BTN:  u8 = 0b0100_0000u8;
+const MINUS_BTN: u8 = 0b1000_0000u8;
 
 pub struct Emulator<'a> {
     pub sdl: Sdl,

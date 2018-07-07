@@ -51,8 +51,8 @@ impl AudioCallback for Wave {
         let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_HARD_NOT);
 
         let note       = ( notes[self.channel*4+1]               ) as usize;
-        let instrument = ((notes[self.channel*4] >> 4) & 0b0111i8) as usize;
-        let volume     = ( notes[self.channel*4]       & 0b1111i8) as usize;
+        let instrument = ((notes[self.channel*4] >> 4) & 0b0111u8) as usize;
+        let volume     = ( notes[self.channel*4]       & 0b1111u8) as usize;
 
         //println!("c: {}, i: {}, vol: {}, not: {}", self.channel, instrument, volume, note);
 
@@ -63,13 +63,15 @@ impl AudioCallback for Wave {
         // next: cache the last index.
         for x in 0..SAMPLES {
             let ind = (x as f32 % period / period * BITY_SAMP as f32) as usize;
-            let amp = wave_data[(ind + self.current_index) % 128];
-            let amp = if amp == -128 {
-                let r: i8 = random();
-                if r == -128 { -127 } else { r }
-            } else { amp };
 
-            let amp = amp as i16 * volume;
+            // some funky conversion between unsigned to signed.
+            let amp = wave_data[(ind + self.current_index) % 128] as i16;
+            let amp = if amp == 0 {
+                let r: i8 = random();
+                if r == -128 { -127i16 } else { r as i16 }
+            } else { amp - 128 };
+
+            let amp = amp * volume;
             out[x as usize] = amp as f32 / SOFTENER;
         }
 
