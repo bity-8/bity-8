@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "bity-8",
+    "bity-8-tools",
+]
