@@ -1,0 +1,33 @@
+Rust
+  Lua Engine
+  [x] Execute Lua code
+
+  Graphics Engine
+  [ ] Display sprites
+  [ ] Display tiles
+
+  Audio Engine
+  [x] Play notes
+  [ ] Play songs
+
+  Cartridge Parsing
+  [ ] Extract Lua code
+  [ ] Extract spritesheets
+  [ ] Extract tilemaps
+  [ ] Extract audio
+
+
+
+Lua
+  BITY-8 Standard Library
+  [ ] Load spritesheets
+  [ ] Load tilemaps
+  [ ] Draw sprites
+  [ ] Draw tiles
+  [ ] Load palette from spritesheet
+  [x] Set palette colors manually
+  [x] Draw lines
+  [x] Draw rectangles
+  [x] Draw ellipses
+  [ ] Play audio
+  [x] Detect player input
