@@ -41,7 +41,8 @@ Palette: 16-color single palette (user defined from 24 bit color scheme).
 
 Audio:
   Note: 2 bytes
-    Instruments: 0.5 byte
+    1 bit note enabled. (useful for memory part, prob not used though in cartridge, though could be.)
+    Instruments: 3 bits
       Square
       Triangle
       Sawtooth
@@ -66,25 +67,24 @@ Audio:
       Chromatic scale starting at A0, ending at C8 (Piano range)
       88 possible notes
 
-  Measure: 65 bytes, 256 max (6.34% cartridge space, 16640 bytes)
+  Measure/Track: 64 + 3 bytes, 256 max (6.34% cartridge space, 16640 bytes)
     Size:
       32 Notes (2 bytes)
 
     Tempo:
       1 byte, controls length of note (lower value = longer notes)
+      2 byte, looping + volume -> 6 + 6 + 4
+      (12 bits looping, 4 bit volume)
 
-  Staff: 6 bytes, 256 max (0.58% cartridge, 1536 bytes)
-    4 channels
-    1 measure per channel (4 bytes)
-    Channel enable + looping (2 bytes)
-    Upper 4 bits: channel enable
-    Middle 5 bits: loop start
-    Lower 5 bits: loop end
-
-  Song Segment:
-    Max size: 1024 staves, 2048 bytes
-    2 bytes (1 byte [staff index] + 3 bits [loop/stop])
-    Remaining 5 bits reserved
+  -- length of song segment is determined by the length of first track
+  -- If track #1 is unavailable, then it is first available track.
+  -- If all the tracks are disabled, then nothing is played. Everything stops.
+  Song Segment, works as a linked list: 6 bytes, 1024 max (0.58% cartridge, 1536 bytes)
+    1 bit reserved
+    tracks enabled    (4  bits)
+    end segment       (1  bits)
+    next song segment (10 bits)
+    4 measures        (4  bytes)
 
 -- Tools --
 The tool for compiling the sprite sheets mentions which sprite sheet is which

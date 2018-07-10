@@ -36,10 +36,34 @@ pub const OFF_AUDIO_DATA:  MemLoc = (0x0D..0x10);
 pub const OFF_RESERVED:    MemLoc = (0x10..0x20);
 
 // --- Hardware Config Locations ---
-pub const OFF_PALETTE: MemLoc = (0x00..0x30); // Pallete
-pub const OFF_INPUT:   MemLoc = (0x31..0x32); // Input
+pub const OFF_PALETTE:   MemLoc = (0x00..0x30); // Pallete
+pub const OFF_INPUT:     MemLoc = (0x31..0x32); // Input
 // Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
-pub const OFF_NOTES:   MemLoc = (0x32..0x42);
+pub const OFF_NOTES:     MemLoc = (0x32..0x42);
+// looping + volume, tempo
+pub const OFF_MEAS_META: MemLoc = (0x42..0x4e);   // loaded from cart
+// 1 byte for current note length left
+// 1 byte for current note
+pub const OFF_MEAS_CTRL: MemLoc = (0x4e..0x56);   // only in memory
+// 4 bits -> sfx playing for each channel
+// 1 bit  -> music playing
+// 3 bits -> reserved
+pub const OFF_CHAN_FLAG: MemLoc = (0x56..0x57);   // only in memory
+pub const OFF_SONG_META: MemLoc = (0x57..0x5D);   // loaded from cart
+// 64 bytes per measure, 4 channels
+pub const OFF_MEAS:      MemLoc = (0x100..0x200); // loaded from cart
+
+// 1 byte length of track/measure
+// 1 byte next channel
+
+pub const OFF_CHAN_1:   MemLoc = (0x32..0x42);
+
+// difference between sfx and music?
+// sfx doesn't have a "next" section.
+
+// std:
+// music(-1)
+// sfx(-1)
 
 // --- 8 Instruments ---
 pub const OFF_INS1: MemLoc = (0x000..0x080);
