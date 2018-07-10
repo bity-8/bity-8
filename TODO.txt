@@ -11,7 +11,7 @@ Rust
   [ ] Play songs
 
   Cartridge Parsing
-  [ ] Extract Lua code
+  [x] Extract Lua code
   [ ] Extract spritesheets
   [ ] Extract tilemaps
   [ ] Extract audio
