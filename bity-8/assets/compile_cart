@@ -79,6 +79,7 @@ write_file(f, args.measure)
 write_file(f, args.song)
 write_file(f, args.code)
 
-print(all_offs)
+print("Compilation Successful!!! :)")
+# print(all_offs)
 
 f.close()
