@@ -7,7 +7,6 @@ pub type MemLoc = Range<usize>;
 pub const CART_LEN : usize = 0x50000; // End of cartridge
 static mut MEM: Memory = [0; CART_LEN];
 
-
 // --- Global Memory Constants ---
 pub const LOC_NULL: MemLoc = (0x00000..0x00000); // Used for addressing null locations.
 pub const LOC_CART: MemLoc = (0x00000..0x40000); // Cartridge

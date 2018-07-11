@@ -1,6 +1,3 @@
-// NOTE: FOR JOSH
-// This is what I started doing for reading the cartridge. You can change whatever if you wanna
-// make tools or sumthin here. You prob know what you want better than me.
 extern crate byteorder;
 
 use std::io;
@@ -157,8 +154,10 @@ pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::C
 
 pub fn get_code_string() -> String {
     println!("{} is the NUMBER.", get_off(mem::COFF_MEASURE));
+    // TODO: make this more professional for the cartridge, and use the offsets specified at the
+    // beginning.
 
-    // go until a null character.
+    // for now, we will go until a null character.
     let mut ind = 0;
     let buffer = mem::get_area(get_code_loc());
     for i in 0..buffer.len() {

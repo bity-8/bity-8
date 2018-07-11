@@ -12,7 +12,7 @@ use sdl2::pixels::PixelFormatEnum;
 use sdl2::gfx::framerate::FPSManager;
 use sdl2::Sdl;
 use std::collections::HashSet;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 
 use std::thread;
 use std::time::Duration;
@@ -81,7 +81,8 @@ impl<'a> Emulator<'a> {
         for x in self.channels.iter() { x.device.resume(); }
 
         let mut fps_mgr = FPSManager::new();
-        fps_mgr.set_framerate(60);
+        fps_mgr.set_framerate(60)
+            .expect("Error when setting framerate!");
         let mut timer = SystemTime::now();
         let mut frames = 0;
 
@@ -115,7 +116,8 @@ impl<'a> Emulator<'a> {
             frames += 1;
 
             if SystemTime::now().duration_since(timer).expect("88 MPH").as_secs() == 1 {
-                canvas.window_mut().set_title(&format!("BITY-8 ({})", frames));
+                canvas.window_mut().set_title(&format!("BITY-8 ({})", frames))
+                    .expect("Error when changing window title!");
                 frames = 0;
                 timer = SystemTime::now();
             }
