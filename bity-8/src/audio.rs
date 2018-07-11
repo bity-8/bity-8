@@ -149,7 +149,7 @@ pub fn update_mem_measure() {
 
         let (note_ind, time_ind) = (i*2, i*2+1);
         let time_left  = ctrl[time_ind];
-        let tempo      = meta[i*3];
+        // let tempo      = meta[i*3];
 
         let (m1, m2)   = (meta[i*3+1], meta[i*3+2]);
         let beg_loop = m1 & 0b1111_1100 >> 2;

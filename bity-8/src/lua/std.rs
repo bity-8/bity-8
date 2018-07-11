@@ -22,7 +22,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
     lua.set("atan2", hlua::function2(|val1: f32, val2: f32| -> f32 {f32::atan2(val1, val2)}));
     lua.set("sqrt" , hlua::function1(|val: f32| -> f32             {f32::sqrt(val)}));
     lua.set("abs" , hlua::function1(|val: f32| -> f32              {f32::abs(val)}));
-    lua.set("rand", hlua::function1(|upper: f32| -> f32            {4f32}));
+    lua.set("rand", hlua::function1(|_upper: f32| -> f32            {4f32}));
     
     // PICO-8 Math bitwise: and, or, xor, not, rotl, rotr, left shift, right shift (arithmetic and logical)
     lua.set("band", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));
@@ -297,7 +297,7 @@ fn draw_sprite(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32
 }
 
 fn draw_sprite_transparent(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32, alpha: u8) {
-  let mut sprite_offset = mem::LOC_SPRI.start + (src_x as usize * 4) + (48 * src_y*8) as usize + (src_sheet * 0xD80) as usize;
+  let sprite_offset = mem::LOC_SPRI.start + (src_x as usize * 4) + (48 * src_y*8) as usize + (src_sheet * 0xD80) as usize;
   let start = cmp::max(cmp::min(y,0).abs(), 0);
 
   for i in start..8*size as i32 {
@@ -319,11 +319,12 @@ fn in_bounds(x:i32, y:i32) -> bool {
 
 fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   let mut x_min = cmp::max(cmp::min(x1, x2), 0);
-  let mut x_max = cmp::min(cmp::max(x1, x2), 193);
+  let x_max = cmp::min(cmp::max(x1, x2), 193);
   if x_min < 0 || x_max > display::SCR_X as i32 || y < 0 || y > display::SCR_Y as i32{
     return;
   }
-  let length = x_min - x_max;
+  // This wasn't used, so I commented it (#nowarnings).
+  // let _length = x_min - x_max;
   if (x_min & 1) == 1 {
     // Need to set right pixel in screen byte
     let mut pixel = mem::peek(get_buffer_loc(x_min as isize, y as isize));

@@ -54,7 +54,7 @@ impl<'a> Emulator<'a> {
         // Measured in nano seconds.
         let fps = Duration::from_secs(1).checked_div(60).unwrap();
         let video_subsystem = self.sdl.video().unwrap();
-        let mut window = video_subsystem.window("BITY-8",
+        let window = video_subsystem.window("BITY-8",
                                             display::SCR_X*display::PIX_LEN,
                                             display::SCR_Y*display::PIX_LEN)
             .position_centered()

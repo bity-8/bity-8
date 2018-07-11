@@ -51,27 +51,22 @@ fn calc_off_data(loc: usize, nxt: usize, siz: usize) -> (usize, usize) {
     }
 }
 
-pub struct Version {
-    major: u8,
-    minor: u8
-}
-
 // Wow, is it that simple?
 pub fn open(file: &Path) {
     let mut f = File::open(file).expect("cart not found");
     let buffer = mem::get_area(mem::LOC_CART);
 
     // read up to the cartridge
-    f.read_exact(buffer);
+    match f.read_exact(buffer) {
+        Ok(_) => ..,
+        Err(_) => ..,
+    };
 }
 
-pub fn get_version() -> Version {
+pub fn get_version() -> (u8, u8) {
     let maj = mem::peek(mem::COFF_MAJOR.start);
     let min = mem::peek(mem::COFF_MINOR.start);
-    Version {
-        major: maj,
-        minor: min,
-    }
+    (maj, min)
 }
 
 // Makes sure that different offsets aren't off.
