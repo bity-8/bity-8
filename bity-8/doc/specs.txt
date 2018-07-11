@@ -82,7 +82,7 @@ Audio:
   Song Segment, works as a linked list: 6 bytes, 1024 max (0.58% cartridge, 1536 bytes)
     1 bit reserved
     tracks enabled    (4  bits)
-    end segment       (1  bits)
+    enable next track (1  bits)
     next song segment (10 bits)
     4 measures        (4  bytes)
 

@@ -1,5 +1,4 @@
 // TODO: take care of all the possible errors (unwraps).
-
 extern crate sdl2;
 extern crate rand;
 use audio::rand::prelude::*;
@@ -111,4 +110,106 @@ impl Channel {
             device: device,
         }
     }
+}
+
+// Updates the current note playing in memory.
+pub fn update_mem_note() {
+    let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_NOTES);
+
+    // 2 notes per channel. 2 bytes per note. 4 channels. So... 16 bytes.
+    for i in 0..4 {
+        notes[i*4+0] = notes[i*4+2]; // move next to current note.
+        notes[i*4+1] = notes[i*4+3]; // move next to current note.
+    }
+}
+
+// Updates the measure/sfx as it is playing in memory.
+// DOES NOT GO TO THE NEXT SFX. That is something abstracted with music.
+// This also doesn't load a measure. See "play_measure".
+pub fn update_mem_measure() {
+    // reserved . note index . time left X 4 channels
+    // 000        0_0000     . 0000_0000
+    let ctrl = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_CTRL);
+
+    // tempo     . beg_loop   volume . end_loop X 4 channels
+    // 0000_0000 . 0000_00  . 00 00    00_0000
+    let meta = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_META);
+
+    // tempo     . beg_loop   volume . end_loop X 4 channels
+    // 0000_0000 . 0000_00  . 00 00    00_0000
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+
+    for i in 0..4 {
+        let channel_one_mask = 0b0000_0001 << i;
+        let channel_zer_mask = !(0b0000_0001 << i);
+        assert!(channel_one_mask < 0b0001_0000);
+
+        // skip this channel if it isn't playing a sound effect.
+        if flag[0] & channel_one_mask == 0 { continue; }
+
+        let (NOTE, TIME) = (i*2, i*2+1);
+        let time_left  = ctrl[TIME];
+        let tempo      = meta[i*3];
+
+        let (m1, m2)   = (meta[i*3+1], meta[i*3+2]);
+        let beg_loop = m1 & 0b1111_1100 >> 2;
+        let volume   = m1 & 0b0000_0011 << 2 | m2 & 0b1100_0000 >> 6;
+        let end_loop = m2 & 0b0011_1111;
+
+        // assert for logic above
+        assert!(beg_loop < 64);
+        assert!(end_loop < 64);
+        assert!(volume < 16);
+
+        // if time left is zero, then do something.
+        if time_left > 0 {
+            assert!(ctrl[TIME] != 0);
+            ctrl[TIME] -= 1;
+        } else {
+            assert!(ctrl[TIME] == 0 && time_left == 0);
+
+            let note_index = ctrl[NOTE] & 0b0001_1111;
+            assert!(note_index <= 31 && note_index >= 0);
+
+            if end_loop > beg_loop {
+                assert!(end_loop >= 1);
+                assert!(end_loop <= 63);
+                // minus 1, because the end loop is exclusive
+                if note_index >= end_loop-1 {
+                    ctrl[NOTE] = beg_loop;
+                } else {
+                    ctrl[NOTE] += 1;
+                }
+            } else if note_index >= 31 { // should actually never be greater than.
+                // if finished, then we can switch the sound effect thing to inactive.
+                flag[0] &= channel_zer_mask;
+            } else  {
+                ctrl[NOTE] += 1;
+            }
+        }
+    }
+}
+
+pub fn play_music() {
+
+}
+
+pub fn pause_music() {
+
+}
+
+pub fn resume_music() {
+
+}
+
+pub fn play_measure() {
+
+}
+
+pub fn pause_measure() {
+
+}
+
+pub fn resume_measure() {
+
 }

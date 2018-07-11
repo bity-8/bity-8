@@ -34,17 +34,6 @@ pub struct Emulator<'a> {
 
 // You can only create one of these.
 impl<'a> Emulator<'a> {
-    // Reads the memory, plays the note, updates memory.
-    pub fn update_audio_memory(&mut self) {
-        let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_NOTES);
-
-        // 2 notes per channel. 2 bytes per note. 4 channels. So... 16 bytes.
-        for i in 0..4 {
-            notes[i*4+0] = notes[i*4+2]; // move next to current note.
-            notes[i*4+1] = notes[i*4+3]; // move next to current note.
-        }
-    }
-
     pub fn new() -> Emulator<'a> {
         let mut sdl = sdl2::init().unwrap();
         let channels = [
@@ -101,11 +90,9 @@ impl<'a> Emulator<'a> {
             use std::time::Instant;
             let now = Instant::now();
 
-            
-            //println!("FPS: {:?}", fps_mgr.get_framerate());
-
-            // Handle sound first
-            self.update_audio_memory();
+            // Music, then measure, then sound.
+            audio::update_mem_measure();
+            audio::update_mem_note();
 
             for event in events.poll_iter() {
                 match event {
@@ -118,7 +105,6 @@ impl<'a> Emulator<'a> {
 
             // Handle input            
             prev_keys = get_input(&mut events, prev_keys);
-
 
             // Handle code
             self.lua.execute::<()>("_update()").unwrap();
