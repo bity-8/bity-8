@@ -7,10 +7,9 @@ pub type MemLoc = Range<usize>;
 pub const CART_LEN : usize = 0x50000; // End of cartridge
 static mut MEM: Memory = [0; CART_LEN];
 
-pub const LOC_NULL: MemLoc = (0x00000..0x00000); // Used for addressing null locations.
 
 // --- Global Memory Constants ---
-pub const LOC_HEAD: MemLoc = (0x00000..0x00032); // header of cartridge
+pub const LOC_NULL: MemLoc = (0x00000..0x00000); // Used for addressing null locations.
 pub const LOC_CART: MemLoc = (0x00000..0x40000); // Cartridge
 pub const LOC_HARD: MemLoc = (0x40000..0x40400); // Hardware Config
 pub const LOC_SCRE: MemLoc = (0x40400..0x43A00); // Screen Buffer
@@ -29,42 +28,29 @@ pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
 pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // --- Cartridge locations ---
-pub const COFF_MAGIC_NUM:    MemLoc = (0x00..0x06);
-pub const COFF_MAJOR:        MemLoc = (0x06..0x07);
-pub const COFF_MINOR:        MemLoc = (0x07..0x08);
-pub const COFF_RESERVED:     MemLoc = (0x08..0x18); // probably a checksum.
-// This section is prone to change in future versions.
-// TODO: delete COFF_SPRITE_SHEET, but make sure everything works
-pub const COFF_SPRITE_SHEET: MemLoc = (0x18..0x1B); // sprite
-pub const COFF_PALETTE:   MemLoc = (0x1B..0x1E);
-pub const COFF_TILE_MAP:     MemLoc = (0x1E..0x21); // map
-pub const COFF_INSTRUMENT:   MemLoc = (0x21..0x24); // audio
-pub const COFF_MEASURE:      MemLoc = (0x24..0x27); // audio
-pub const COFF_MEASURE_DATA: MemLoc = (0x27..0x30);
-pub const COFF_SONG:         MemLoc = (0x30..0x33);
-pub const COFF_CODE:         MemLoc = (0x33..0x36);
+pub const LOC_HEAD:          MemLoc = (0x00000..0x00036); // header of cartridge
+pub const COFF_MAGIC_NUM:    MemLoc = (0x00000..0x00006); // BITY-8
+pub const COFF_MAJOR:        MemLoc = (0x00006..0x00007);
+pub const COFF_MINOR:        MemLoc = (0x00007..0x00008);
+pub const COFF_RESERVED:     MemLoc = (0x00008..0x00018); // probably a checksum.
+pub const COFF_SPRITE:       MemLoc = (0x00018..0x0001B); // sprite, TODO: maybe delete.
+pub const COFF_PALETTE:      MemLoc = (0x0001B..0x0001E);
+pub const COFF_TILE_MAP:     MemLoc = (0x0001E..0x00021); // map
+pub const COFF_INSTRUMENT:   MemLoc = (0x00021..0x00024); // audio
+pub const COFF_MEASURE:      MemLoc = (0x00024..0x00027); // audio
+pub const COFF_MEASURE_DATA: MemLoc = (0x00027..0x00030);
+pub const COFF_SONG:         MemLoc = (0x00030..0x00033);
+pub const COFF_CODE:         MemLoc = (0x00033..0x00036);
 
 // --- Hardware Config Locations ---
 pub const OFF_PALETTE:   MemLoc = (0x00..0x30); // Pallete
 pub const OFF_INPUT:     MemLoc = (0x31..0x32); // Input
-
-// Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
-pub const OFF_NOTES:     MemLoc = (0x32..0x42);
-
-// looping + volume, tempo
-pub const OFF_MEAS_META: MemLoc = (0x42..0x4e);   // loaded from cart
-
-// 1 byte for current note length left
-// 5 bits for current note . 3 bits reserved
-pub const OFF_MEAS_CTRL: MemLoc = (0x4e..0x56);   // only in memory
-
-// reserved . music playing . sfx playing
-// 000      . 0             . 0000
-pub const OFF_CHAN_FLAG: MemLoc = (0x56..0x57);   // only in memory
-pub const OFF_SONG_META: MemLoc = (0x57..0x5D);   // loaded from cart
-
-// 64 bytes per measure, 4 channels
-pub const OFF_MEAS:      MemLoc = (0x100..0x200); // loaded from cart
+pub const OFF_NOTES:     MemLoc = (0x32..0x42); // Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
+pub const OFF_MEAS_META: MemLoc = (0x42..0x4e); // loaded from cart, looping + volume, tempo
+pub const OFF_MEAS_CTRL: MemLoc = (0x4e..0x56); // only in memory, 1 byte for current note length left, 5 bits for current note . 3 bits reserved
+pub const OFF_CHAN_FLAG: MemLoc = (0x56..0x57); // only in memory, reserved . music playing . sfx playing, 000      . 0             . 0000
+pub const OFF_SONG_META: MemLoc = (0x57..0x5D); // loaded from cart
+pub const OFF_MEAS:      MemLoc = (0x100..0x200); // loaded from cart, 64 bytes per measure, 4 channels
 
 // --- 8 Instruments ---
 pub const OFF_INS1: MemLoc = (0x000..0x080);
