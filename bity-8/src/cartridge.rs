@@ -157,10 +157,8 @@ pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::C
 
 pub fn get_code_string() -> String {
     println!("{} is the NUMBER.", get_off(mem::COFF_MEASURE));
-    // TODO: make this more professional for the cartridge, and use the offsets specified at the
-    // beginning.
 
-    // for now, we will go until a null character.
+    // go until a null character.
     let mut ind = 0;
     let buffer = mem::get_area(get_code_loc());
     for i in 0..buffer.len() {
