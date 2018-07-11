@@ -7,7 +7,6 @@ publish = false
 name = "bity_8"
 
 [dependencies]
-byteorder = "1.2.3"
 hlua = "0.3"
 rand = "0.5"
 bresenham = "0.1.1"

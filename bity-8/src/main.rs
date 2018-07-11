@@ -22,6 +22,7 @@ fn main() {
 
         // Code Initialization.
         cartridge::open(Path::new(&args[1]));
+        cartridge::check_offsets();
 
         // Evaluate the code.
         let code = cartridge::get_code_string();

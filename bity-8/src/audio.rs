@@ -147,8 +147,8 @@ pub fn update_mem_measure() {
         // skip this channel if it isn't playing a sound effect.
         if flag[0] & channel_one_mask == 0 { continue; }
 
-        let (NOTE, TIME) = (i*2, i*2+1);
-        let time_left  = ctrl[TIME];
+        let (note_ind, time_ind) = (i*2, i*2+1);
+        let time_left  = ctrl[time_ind];
         let tempo      = meta[i*3];
 
         let (m1, m2)   = (meta[i*3+1], meta[i*3+2]);
@@ -163,28 +163,28 @@ pub fn update_mem_measure() {
 
         // if time left is zero, then do something.
         if time_left > 0 {
-            assert!(ctrl[TIME] != 0);
-            ctrl[TIME] -= 1;
+            assert!(ctrl[time_ind] != 0);
+            ctrl[time_ind] -= 1;
         } else {
-            assert!(ctrl[TIME] == 0 && time_left == 0);
+            assert!(ctrl[time_ind] == 0 && time_left == 0);
 
-            let note_index = ctrl[NOTE] & 0b0001_1111;
-            assert!(note_index <= 31 && note_index >= 0);
+            let note_index = ctrl[note_ind] & 0b0001_1111;
+            assert!(note_index <= 31);
 
             if end_loop > beg_loop {
                 assert!(end_loop >= 1);
                 assert!(end_loop <= 63);
                 // minus 1, because the end loop is exclusive
                 if note_index >= end_loop-1 {
-                    ctrl[NOTE] = beg_loop;
+                    ctrl[note_ind] = beg_loop;
                 } else {
-                    ctrl[NOTE] += 1;
+                    ctrl[note_ind] += 1;
                 }
             } else if note_index >= 31 { // should actually never be greater than.
                 // if finished, then we can switch the sound effect thing to inactive.
                 flag[0] &= channel_zer_mask;
             } else  {
-                ctrl[NOTE] += 1;
+                ctrl[note_ind] += 1;
             }
         }
     }

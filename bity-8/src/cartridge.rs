@@ -1,12 +1,8 @@
-extern crate byteorder;
-
-use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::str;
 
-use self::byteorder::{BigEndian};
 use memory as mem;
 
 // Each max constraint is: [0-x).
@@ -14,7 +10,7 @@ pub const MAX_SPRITE:     usize = 64;
 pub const MAX_PALETTE:    usize = 16;
 pub const MAX_TILE_MAP:   usize = 32;
 pub const MAX_INSTRUMENT: usize = 4;
-pub const MAX_MEASURE:    usize = 256
+pub const MAX_MEASURE:    usize = 256;
 pub const MAX_SONG:       usize = 1024;
 
 // Measured in bytes
@@ -30,18 +26,29 @@ fn get_off(offset: mem::MemLoc) -> usize {
     assert!(offset.end - offset.start == 3);
     let arr = mem::get_area(offset);
     assert!(arr.len() == 3);
-    BigEndian::read_uint(arr, 3) as usize
+    // Big Endian
+    let mut end  =  arr[2] as usize;
+    end |= (arr[1] as usize) << 8;
+    end |= (arr[0] as usize) << 16;
+    end + mem::LOC_HEAD.end // All offsets of 0 mean that it starts right after the header.
 }
 
 // Returns the length of the offset, and the modulus (for errors).
 fn get_off_info(loc: mem::MemLoc, siz: usize) -> (usize, usize) {
-    let nxt_loc = (loc.start+3..loc.end+3); // Assuming all the offsets have a size of 3.
-    let len = get_off(nxt_loc) - get_off(loc);
-    (len / size, len % size, off)
+    let nxt_loc = (loc.start+3)..(loc.end+3); // Assuming all the offsets have a size of 3.
+    let nxt = get_off(nxt_loc);
+    let loc = get_off(loc);
+    calc_off_data(loc, nxt, siz)
 }
 
-fn get_off_len(loc: mem::MemLoc, siz: usize) -> usize {
-    get_off_info(loc, siz).0
+// Returns the length of the offset, and the modulus (for errors).
+fn calc_off_data(loc: usize, nxt: usize, siz: usize) -> (usize, usize) {
+    if nxt > loc {
+        let len = nxt - loc;
+        (len / siz, len % siz)
+    } else {
+        (0, 0)
+    }
 }
 
 pub struct Version {
@@ -52,7 +59,7 @@ pub struct Version {
 // Wow, is it that simple?
 pub fn open(file: &Path) {
     let mut f = File::open(file).expect("cart not found");
-    let mut buffer = mem::get_area(mem::LOC_CART);
+    let buffer = mem::get_area(mem::LOC_CART);
 
     // read up to the cartridge
     f.read_exact(buffer);
@@ -69,18 +76,27 @@ pub fn get_version() -> Version {
 
 // Makes sure that different offsets aren't off.
 // If they are off, then this panics.
-pub fn check_allignment() ->  {
+pub fn check_offsets() {
     // TODO: Replace these with nice error messages instead.
     // Yeah, I'm getting hacky for the deadline I guess.
 
-    let sp = get_off_info(mem::COFF_SPRITE,     SIZE_SPRITE);
+    // -------- MAGIC NUMBER --------
+    let mn = mem::get_area(mem::COFF_MAGIC_NUM);
+    assert!(mem::COFF_MAGIC_NUM.end - mem::COFF_MAGIC_NUM.start == 6);
+
+    // BITY-8
+    if mn[0] != 0x42 || mn[1] != 0x49 || mn[2] != 0x54 || mn[3] != 0x59 || mn[4] != 0x2D || mn[5] != 0x38  {
+        panic!("The magic number is wrong! It should be: \"BITY-8\"!");
+    }
+
+    // -------- BAD MODS --------
+    let sp = calc_off_data(mem::LOC_HEAD.end, mem::COFF_PALETTE.start, SIZ_SPRITE);
     let pa = get_off_info(mem::COFF_PALETTE,    SIZ_PALETTE);
     let tm = get_off_info(mem::COFF_TILE_MAP,   SIZ_TILE_MAP);
     let is = get_off_info(mem::COFF_INSTRUMENT, SIZ_INSTRUMENT);
     let me = get_off_info(mem::COFF_MEASURE,    SIZ_MEASURE);
     let so = get_off_info(mem::COFF_SONG,       SIZ_SONG); // uses the code offset here.
 
-    // -------- BAD MODS --------
     if sp.1 != 0 { panic!("Sprite Sheet is not divisible by size"); }
     if pa.1 != 0 { panic!("Palette is not divisible by size"); }
     if tm.1 != 0 { panic!("Tile Map is not divisible by size"); }
@@ -96,12 +112,7 @@ pub fn check_allignment() ->  {
     if me.0 > MAX_MEASURE    { panic!("Measure is too big"); }
     if so.0 > MAX_SONG       { panic!("Song is too big"); }
     
-    // -------- MAGIC NUMBER --------
-    let mn = mem::get_area(mem::COFF_MAGIC_NUM);
-    assert!(mem::COFF_MAGIC_NUM.end - mem::COFF_MAGIC_NUM.start == 6);
-
     // -------- ORDERED REFS --------
-    let sp = get_off(mem::COFF_SPRITE);
     let pa = get_off(mem::COFF_PALETTE);
     let tm = get_off(mem::COFF_TILE_MAP);
     let is = get_off(mem::COFF_INSTRUMENT);
@@ -109,48 +120,51 @@ pub fn check_allignment() ->  {
     let so = get_off(mem::COFF_SONG);
     let co = get_off(mem::COFF_CODE);
 
-    if sp > pa { panic!("Sprite sheet is past a further offset."); }
     if pa > tm { panic!("Palette is past a further offset."); }
     if tm > is { panic!("Tile map is past a further offset."); }
     if is > me { panic!("Instrument is past a further offset."); }
     if me > so { panic!("Measure is past a further offset."); }
     if so > co { panic!("Song is past a further offset."); }
 
-    // -------- PAST CART BOUNDARY --------
-    if sp > mem::LOC_CART.end { panic!("Sprite sheet is past cart size."); }
-    if pa > mem::LOC_CART.end { panic!("Palette is past cart size."); }
-    if tm > mem::LOC_CART.end { panic!("Tile map is past cart size."); }
-    if is > mem::LOC_CART.end { panic!("Instrument is past cart size."); }
-    if me > mem::LOC_CART.end { panic!("Measure is past cart size."); }
-    if so > mem::LOC_CART.end { panic!("Song is past cart size."); }
-    if co > mem::LOC_CART.end { panic!("Code is past cart size."); }
+    // -------- PAST CART END --------
+    let end = mem::LOC_CART.end;
 
-    // BITY-8
-    if mn[0] != 0x41 || mn[1] != 0x49 || mn[2] != 0x54 || mn[3] != 0x59 || mn[4] != 0x2D || mn[5] != 0x38  {
-        panic!("The magic number is wrong! It should be: \"BITY-8\"!");
-    }
+    if pa > end { panic!("Palette is past cart size."); }
+    if tm > end { panic!("Tile map is past cart size."); }
+    if is > end { panic!("Instrument is past cart size."); }
+    if me > end { panic!("Measure is past cart size."); }
+    if so > end { panic!("Song is past cart size."); }
+    if co > end { panic!("Code is past cart size."); }
 }
 
-fn get_data_loc(ind: usize, data_off: mem::MemLoc, data_size: usize) -> mem::MemLoc {
-    let off  = get_off(data_off);
-    let size = get_off_len(data_off, data_size);
+// helper function for getting locations
+fn get_data_loc(ind: usize, loc: mem::MemLoc, data_size: usize) -> mem::MemLoc {
+    let nxt_loc = (loc.start+3)..(loc.end+3);
+    let off  = get_off(loc);
+    let nxt_off = get_off(nxt_loc);
+
+    calc_data_loc(ind, off, nxt_off, data_size)
+}
+
+// another helper function
+fn calc_data_loc(ind: usize, off: usize, nxt_off: usize, data_size: usize) -> mem::MemLoc {
+    let size = (nxt_off - off) / data_size;
 
     if size > 0 && ind < size {
-        let beg = data_off.start;
-        let end = beg + ind * data_size;
-        (beg, end)
+        let end = off + ind * data_size;
+        (off..end)
     } else {
         mem::LOC_NULL
     }
 }
 
-pub fn get_sprite_loc(ind: usize)     -> mem::MemLoc { get_data_loc(ind, mem::COFF_SPRITE,     SIZ_SPRITE)     }
+pub fn get_sprite_loc(ind: usize)     -> mem::MemLoc { calc_data_loc(ind, mem::LOC_HEAD.end, get_off(mem::COFF_PALETTE), SIZ_SPRITE) }
 pub fn get_palette_loc(ind: usize)    -> mem::MemLoc { get_data_loc(ind, mem::COFF_PALETTE,    SIZ_PALETTE)    }
 pub fn get_tile_map_loc(ind: usize)   -> mem::MemLoc { get_data_loc(ind, mem::COFF_TILE_MAP,   SIZ_TILE_MAP)   }
 pub fn get_instrument_loc(ind: usize) -> mem::MemLoc { get_data_loc(ind, mem::COFF_INSTRUMENT, SIZ_INSTRUMENT) }
 pub fn get_measure_loc(ind: usize)    -> mem::MemLoc { get_data_loc(ind, mem::COFF_MEASURE,    SIZ_MEASURE)    }
 pub fn get_song_loc(ind: usize)       -> mem::MemLoc { get_data_loc(ind, mem::COFF_SONG,       SIZ_SONG)       }
-pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::COFF_CODE); (code, mem::LOC_CART.end) }
+pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::COFF_CODE); (code..mem::LOC_CART.end) }
 
 pub fn get_code_string() -> String {
     println!("{} is the NUMBER.", get_off(mem::COFF_MEASURE));
@@ -168,7 +182,7 @@ pub fn get_code_string() -> String {
     }
 
     let s = str::from_utf8(&buffer[0..ind]).unwrap();
-    let mut s = String::from(s);
+    let s = String::from(s);
     println!("{}", s);
     s
 }

@@ -27,19 +27,18 @@ pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
 pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // --- Cartridge locations ---
-pub const LOC_HEAD:          MemLoc = (0x00000..0x00036); // header of cartridge
+pub const LOC_HEAD:          MemLoc = (0x00000..0x00030); // header of cartridge
 pub const COFF_MAGIC_NUM:    MemLoc = (0x00000..0x00006); // BITY-8
 pub const COFF_MAJOR:        MemLoc = (0x00006..0x00007);
 pub const COFF_MINOR:        MemLoc = (0x00007..0x00008);
-pub const COFF_RESERVED:     MemLoc = (0x00008..0x00018); // probably a checksum.
-pub const COFF_SPRITE:       MemLoc = (0x00018..0x0001B); // sprite, TODO: maybe delete.
-pub const COFF_PALETTE:      MemLoc = (0x0001B..0x0001E);
-pub const COFF_TILE_MAP:     MemLoc = (0x0001E..0x00021); // map
-pub const COFF_INSTRUMENT:   MemLoc = (0x00021..0x00024); // audio
-pub const COFF_MEASURE:      MemLoc = (0x00024..0x00027); // audio
-pub const COFF_MEASURE_DATA: MemLoc = (0x00027..0x00030);
-pub const COFF_SONG:         MemLoc = (0x00030..0x00033);
-pub const COFF_CODE:         MemLoc = (0x00033..0x00036);
+// pub const COFF_SPRITE:       MemLoc = (0x00018..0x0001B); // sprite, TODO: maybe delete.
+pub const COFF_PALETTE:      MemLoc = (0x00008..0x0000B);
+pub const COFF_TILE_MAP:     MemLoc = (0x0000B..0x0000E); // map
+pub const COFF_INSTRUMENT:   MemLoc = (0x0000E..0x00011); // audio
+pub const COFF_MEASURE:      MemLoc = (0x00011..0x00014); // audio
+pub const COFF_SONG:         MemLoc = (0x00017..0x0001A);
+pub const COFF_CODE:         MemLoc = (0x0001A..0x0001D);
+pub const COFF_RESERVED:     MemLoc = (0x0001D..0x00030); // probably a checksum.
 
 // --- Hardware Config Locations ---
 pub const OFF_PALETTE:   MemLoc = (0x00..0x30); // Pallete
