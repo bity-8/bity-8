@@ -14,7 +14,7 @@ pub const MAX_MEASURE:    usize = 256;
 pub const MAX_SONG:       usize = 1024;
 
 // Measured in bytes
-pub const SIZ_SPRITE:    usize = 3456;
+pub const SIZ_SPRITE:     usize = 3456;
 pub const SIZ_PALETTE:    usize = 48;
 pub const SIZ_TILE_MAP:   usize = 6912;
 pub const SIZ_INSTRUMENT: usize = 128;
@@ -162,7 +162,6 @@ pub fn get_song_loc(ind: usize)       -> mem::MemLoc { get_data_loc(ind, mem::CO
 pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::COFF_CODE); (code..mem::LOC_CART.end) }
 
 pub fn get_code_string() -> String {
-    println!("{} is the NUMBER.", get_off(mem::COFF_MEASURE));
     // TODO: make this more professional for the cartridge, and use the offsets specified at the
     // beginning.
 
@@ -178,6 +177,5 @@ pub fn get_code_string() -> String {
 
     let s = str::from_utf8(&buffer[0..ind]).unwrap();
     let s = String::from(s);
-    println!("{}", s);
     s
 }

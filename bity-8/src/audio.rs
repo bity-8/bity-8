@@ -94,9 +94,9 @@ impl Channel {
         };
 
         audio_subsystem.open_queue::<i16, _>(None, &desired_spec).unwrap();
-        let device = audio_subsystem.open_playback(None, &desired_spec, |spec| {
+        let device = audio_subsystem.open_playback(None, &desired_spec, |_spec| {
             // Show obtained AudioSpec
-            println!("{:?}", spec);
+            // println!("{:?}", spec);
 
             // initialize the audio callback
             Wave {

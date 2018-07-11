@@ -35,10 +35,10 @@ pub const COFF_MINOR:        MemLoc = (0x00007..0x00008);
 pub const COFF_PALETTE:      MemLoc = (0x00008..0x0000B);
 pub const COFF_TILE_MAP:     MemLoc = (0x0000B..0x0000E); // map
 pub const COFF_INSTRUMENT:   MemLoc = (0x0000E..0x00011); // audio
-pub const COFF_MEASURE:      MemLoc = (0x00011..0x00014); // audio
-pub const COFF_SONG:         MemLoc = (0x00017..0x0001A);
-pub const COFF_CODE:         MemLoc = (0x0001A..0x0001D);
-pub const COFF_RESERVED:     MemLoc = (0x0001D..0x00030); // probably a checksum.
+pub const COFF_MEASURE:      MemLoc = (0x00011..0x00014);
+pub const COFF_SONG:         MemLoc = (0x00014..0x00017);
+pub const COFF_CODE:         MemLoc = (0x00017..0x0001A);
+pub const COFF_RESERVED:     MemLoc = (0x0001A..0x00030); // probably a checksum.
 
 // --- Hardware Config Locations ---
 pub const OFF_PALETTE:   MemLoc = (0x00..0x30); // Pallete

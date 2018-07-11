@@ -12,7 +12,7 @@ fn main() {
     let args: Vec<_> = env::args().collect();
 
     if args.len() < 2 {
-        println!("Usage: cargo run --bin bity-8 /path/to/file.lua")
+        println!("Usage: cargo run --bin bity-8 /path/to/cart.b8")
     } else {
         // Hardware initialization.
         let mut em = emulator::Emulator::new();

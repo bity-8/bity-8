@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+# A dinky little bity-8 cart compiler
+
+import argparse
+import os
+
+sprite  = {'max': 64, 'len': 3456, 'siz': 0}
+palette = {'max': 16, 'len': 48, 'siz': 0}
+tile = {'max': 32, 'len': 6912, 'siz': 0}
+instrument = {'max': 4, 'len': 128, 'siz': 0}
+measure = {'max': 256, 'len': 67, 'siz': 0}
+song = {'max': 1024, 'len': 6, 'siz': 0}
+all_offs = {'sprite': sprite, 'palette': palette, 'tile': tile, 'instrument': instrument, 'measure': measure, 'song': song}
+
+def write_file(cart, filename):
+    if filename:
+        tmpf = open(filename, 'rb')
+        cart.write(tmpf.read())
+        tmpf.close()
+
+def error(s):
+    sys.exit("Error: " + s)
+
+def setSize(filename, dic):
+    if filename:
+        st = os.stat(filename)
+        dic['siz'] = st.st_size
+
+def arg_logic():
+    parser = argparse.ArgumentParser(prog="compile-cart",description = "A temp bity-8 cart compiler, takes care of header data.")
+    parser.add_argument("out",          help="File to write to.")
+    parser.add_argument("--sprite",     metavar='sp',  help="The sprite sheet binaries.")
+    parser.add_argument("--palette",    metavar='pa',  help="The sprite sheet binaries.")
+    parser.add_argument("--tile",       metavar='ti',  help="The sprite sheet binaries.")
+    parser.add_argument("--instrument", metavar='in',  help="The sprite sheet binaries.")
+    parser.add_argument("--measure",    metavar='me',  help="The sprite sheet binaries.")
+    parser.add_argument("--song",       metavar='so',  help="The sprite sheet binaries.")
+    parser.add_argument("--code",       metavar='co',  help="The sprite sheet binaries.")
+
+    return parser.parse_args()
+
+args = arg_logic()
+setSize(args.sprite, sprite)
+setSize(args.palette, palette)
+setSize(args.tile, tile)
+setSize(args.instrument, instrument)
+setSize(args.measure, measure)
+setSize(args.song, song)
+
+for k, v in all_offs.items():
+    if v['siz'] / v['len'] > v['max'] or v['siz'] % v['len'] != 0:
+        error("You messed up the offset for " + k)
+
+f = open(args.out, 'wb')
+f.write(bytes([0x42, 0x49, 0x54, 0x59, 0x2D, 0x38])) # BITY-8
+f.write(bytes([0, 1])) # Version
+# palette, tile, instrument, measure, song
+offs = [
+        sprite['siz'], # palette
+        palette['siz'] + sprite['siz'], # tile
+        tile['siz'] + palette['siz'] + sprite['siz'], # instrument
+        instrument['siz'] + tile['siz'] + palette['siz'] + sprite['siz'], # measure
+        measure['siz'] + instrument['siz'] + tile['siz'] + palette['siz'] + sprite['siz'], # song
+        song['siz'] + measure['siz'] + instrument['siz'] + tile['siz'] + palette['siz'] + sprite['siz'], # code
+        ]
+
+offs = [x.to_bytes(3, byteorder='big') for x in offs]
+for off in offs:
+    f.write(off)
+
+# Reserved section
+f.write(bytes([0] * 22))
+
+write_file(f, args.sprite)
+write_file(f, args.palette)
+write_file(f, args.tile)
+write_file(f, args.instrument)
+write_file(f, args.measure)
+write_file(f, args.song)
+write_file(f, args.code)
+
+print(all_offs)
+
+f.close()
