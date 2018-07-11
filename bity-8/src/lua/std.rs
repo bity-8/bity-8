@@ -204,7 +204,7 @@ pub fn load_std(lua: &mut hlua::Lua) {
       draw_sprite(0,5,0,168,32,1);
       draw_sprite(0,5,0,176,32,1);
       draw_sprite(0,5,0,184,32,1);
-      draw_sprite(0,6,1,0,  40,1);
+      draw_sprite(0,6,1,-2,  40,1);
       draw_sprite(0,5,0,8,  40,1);
       draw_sprite(0,5,0,16, 40,1);
       draw_sprite(0,5,0,24, 40,1);
@@ -270,16 +270,27 @@ fn draw_line(x1:i32,y1:i32,x2:i32,y2:i32,color:u8) {
 
 fn draw_sprite(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32) {
   let mut sprite_offset = mem::LOC_SPRI.start + (src_x as usize * 4) + (48 * src_y*8) as usize + (src_sheet * 0xD80) as usize;
+  let start = cmp::max(cmp::min(y,0).abs(), 0);
   if (x & 1) == 1 {
-
+    for i in start..8*size as i32 {
+    for j in 0..4*size as i32 {
+      let sprite_pixel = mem::peek(sprite_offset + j as usize + (48 * i) as usize);
+      set_point(x + j * 2, y + i, sprite_pixel >> 4);
+      set_point(x + j * 2 + 1, y + i, sprite_pixel & 15);
+    }
+  }
   } else {
-    let start = cmp::max(cmp::min(y,0).abs(), 0);
     for i in start..8*size as i32 {
       if sprite_offset < mem::LOC_SCRE.start {
         println!("Line out of bounds");
         continue;
       }
-      mem::mcpy_w(get_buffer_loc(x as isize,(y+i as i32) as isize), sprite_offset as usize, (size*4) as usize);
+      let length = (size*4) as i32 + cmp::min(x/2, 0);
+      if length < (size*4) as i32 {
+        mem::mcpy_w(get_buffer_loc(0 as isize,(y+i as i32) as isize), sprite_offset + (x.abs()/2) as usize, length as usize);
+      } else {
+        mem::mcpy_w(get_buffer_loc(x as isize,(y+i as i32) as isize), sprite_offset as usize, (size*4) as usize);
+      }
       sprite_offset += 48;
     }
   }
