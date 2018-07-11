@@ -7,7 +7,10 @@ pub type MemLoc = Range<usize>;
 pub const CART_LEN : usize = 0x50000; // End of cartridge
 static mut MEM: Memory = [0; CART_LEN];
 
+pub const LOC_NULL: MemLoc = (0x00000..0x00000); // Used for addressing null locations.
+
 // --- Global Memory Constants ---
+pub const LOC_HEAD: MemLoc = (0x00000..0x00032); // header of cartridge
 pub const LOC_CART: MemLoc = (0x00000..0x40000); // Cartridge
 pub const LOC_HARD: MemLoc = (0x40000..0x40400); // Hardware Config
 pub const LOC_SCRE: MemLoc = (0x40400..0x43A00); // Screen Buffer
@@ -26,14 +29,18 @@ pub const LOC_ROM:        MemLoc = (0x00000..0x40000);
 pub const LOC_WRITABLE:   MemLoc = (0x40000..0x50000);
 
 // --- Cartridge locations ---
-pub const OFF_MAGIC_NUM:   MemLoc = (0x00..0x05);
-pub const OFF_MAJOR:       MemLoc = (0x05..0x06);
-pub const OFF_MINOR:       MemLoc = (0x06..0x07);
+pub const COFF_MAGIC_NUM:    MemLoc = (0x00..0x05);
+pub const COFF_MAJOR:        MemLoc = (0x05..0x06);
+pub const COFF_MINOR:        MemLoc = (0x06..0x07);
+pub const COFF_RESERVED:     MemLoc = (0x07..0x17); // probably a checksum.
 // This section is prone to change in future versions.
-pub const OFF_SPRITE_DATA: MemLoc = (0x07..0x0A);
-pub const OFF_TILE_DATA:   MemLoc = (0x0A..0x0D);
-pub const OFF_AUDIO_DATA:  MemLoc = (0x0D..0x10);
-pub const OFF_RESERVED:    MemLoc = (0x10..0x20);
+pub const COFF_SPRITE_SHEET: MemLoc = (0x17..0x1A); // sprite
+pub const COFF_SPRITE_PAL:   MemLoc = (0x1A..0x1D);
+pub const COFF_TILE_MAP:     MemLoc = (0x1D..0x20); // map
+pub const COFF_INSTRUMENT:   MemLoc = (0x20..0x23); // audio
+pub const COFF_MEASURE:      MemLoc = (0x23..0x26); // audio
+pub const COFF_MEASURE_DATA: MemLoc = (0x26..0x29);
+pub const COFF_SONG:         MemLoc = (0x29..0x32);
 
 // --- Hardware Config Locations ---
 pub const OFF_PALETTE:   MemLoc = (0x00..0x30); // Pallete
