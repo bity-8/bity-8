@@ -2,7 +2,6 @@
 
 0x40000-0x403FF -> Hardware config registers
     Palette -> 0x30
-    Font    -> 0x60
     Input   -> 0x1
 
 0x40400-0x439FF -> Screen buffer

@@ -78,8 +78,8 @@ Audio:
     1 measure per channel (4 bytes)
     Channel enable + looping (2 bytes)
     Upper 4 bits: channel enable
-    Middle 6 bits: loop start
-    Lower 6 bits: loop end
+    Middle 5 bits: loop start
+    Lower 5 bits: loop end
 
   Song Segment:
     Max size: 1024 staves, 2048 bytes

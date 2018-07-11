@@ -3,7 +3,7 @@ Rust
   [x] Execute Lua code
 
   Graphics Engine
-  [ ] Display sprites
+  [x] Display sprites
   [ ] Display tiles
 
   Audio Engine
@@ -22,7 +22,7 @@ Lua
   BITY-8 Standard Library
   [ ] Load spritesheets
   [ ] Load tilemaps
-  [ ] Draw sprites
+  [x] Draw sprites
   [ ] Draw tiles
   [ ] Load palette from spritesheet
   [x] Set palette colors manually
