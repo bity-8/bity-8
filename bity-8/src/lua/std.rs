@@ -255,7 +255,7 @@ fn in_bounds(x:i32, y:i32) -> bool {
 
 fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
   let mut x_min = cmp::max(cmp::min(x1, x2), 0);
-  let x_max = cmp::min(cmp::max(x1, x2), 193);
+  let x_max = cmp::min(cmp::max(x1, x2), 191);
   if x_min < 0 || x_max > display::SCR_X as i32 || y < 0 || y > display::SCR_Y as i32{
     return;
   }
