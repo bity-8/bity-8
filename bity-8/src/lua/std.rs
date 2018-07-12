@@ -274,7 +274,14 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
     pixel = (pixel & 0x0F) | (color << 4);
     mem::poke_w(get_buffer_loc(x_max as isize, y as isize), pixel);
   }
-  let length = f32::ceil(x_max as f32/2.0 - x_min as f32/2.0) as usize;
+  let length = f32::ceil(x_max as f32/2.0 - x_min as f32/2.0);
+  let length = {
+    if length < 0.0 {
+      0 as usize
+    } else {
+      length as usize
+    }
+  };
   mem::mset_w(get_buffer_loc(x_min as isize, y as isize), length, color | (color << 4));
 }
 
