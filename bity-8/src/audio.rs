@@ -128,8 +128,11 @@ pub fn update_mem_note() {
 // DOES NOT GO TO THE NEXT SFX. That is something abstracted with music.
 // This also doesn't load a measure. See "play_measure".
 pub fn update_mem_measure() {
-    // reserved . note index . time left X 4 channels
-    // 000        0_0000     . 0000_0000
+    // TODO: make this function cleaner.
+    // TODO: be positive that the looping logic works.
+
+    // reserved . note index  . time left X 4 channels
+    // 00         00_0000     . 0000_0000
     let ctrl = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_CTRL);
 
     // tempo     . beg_loop   volume . end_loop X 4 channels
@@ -140,6 +143,12 @@ pub fn update_mem_measure() {
     // 000      . 0             . 0000
     let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
 
+    // TODO: document this one too :).
+    let notes = mem::get_sub_area(mem::LOC_HARD, mem::OFF_NOTES);
+
+    // TODO: document this. Really, just array of notes.
+    let meas = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_DATA);
+
     for i in 0..4 {
         let channel_one_mask = 0b0000_0001 << i;
         let channel_zer_mask = !(0b0000_0001 << i);
@@ -149,12 +158,13 @@ pub fn update_mem_measure() {
         if flag[0] & channel_one_mask == 0 { continue; }
 
         let (note_ind, time_ind) = (i*2, i*2+1);
+        let (note_p1, note_p2) = (i*4+2, i*4+3);
         let time_left  = ctrl[time_ind];
-        // let tempo      = meta[i*3];
+        let tempo      = meta[i*cart::SIZ_MEASURE_META];
 
-        let (m1, m2)   = (meta[i*3+1], meta[i*3+2]);
+        let (m1, m2)   = (meta[i*cart::SIZ_MEASURE_META+1], meta[i*cart::SIZ_MEASURE_META+2]);
         let beg_loop = m1 & 0b1111_1100 >> 2;
-        let volume   = m1 & 0b0000_0011 << 2 | m2 & 0b1100_0000 >> 6;
+        let volume   = m1 & (0b0000_0011 << 2) | (m2 & 0b1100_0000 >> 6);
         let end_loop = m2 & 0b0011_1111;
 
         // assert for logic above
@@ -169,23 +179,48 @@ pub fn update_mem_measure() {
         } else {
             assert!(ctrl[time_ind] == 0 && time_left == 0);
 
-            let note_index = ctrl[note_ind] & 0b0001_1111;
-            assert!(note_index <= 31);
+            let note_index = ctrl[note_ind] & 0b0011_1111;
+            assert!(note_index <= 63);
 
             if end_loop > beg_loop {
                 assert!(end_loop >= 1);
                 assert!(end_loop <= 63);
                 // minus 1, because the end loop is exclusive
+                ctrl[time_ind] = tempo;
                 if note_index >= end_loop-1 {
+                    assert!(beg_loop <= 63);
                     ctrl[note_ind] = beg_loop;
                 } else {
-                    ctrl[note_ind] += 1;
+                    // TODO: think about this a bit more. Will it ever reach the end of the loop?
+                    ctrl[note_ind] = ((ctrl[note_ind] & 0b0011_1111) +  1) & 0b0011_1111;
+                }
+
+                // TODO: FIX DUPLICATE CODE
+                let note_index = (ctrl[note_ind] & 0b0011_1111) as usize;
+                if note_index >= 32 {
+                    notes[note_p1] = 0;
+                    notes[note_p2] = 0;
+                } else {
+                    assert!(note_index < 32);
+                    notes[note_p1] = meas[i*64 + note_index*2];
+                    notes[note_p2] = meas[i*64 + note_index*2+1];
                 }
             } else if note_index >= 31 { // should actually never be greater than.
                 // if finished, then we can switch the sound effect thing to inactive.
                 flag[0] &= channel_zer_mask;
+
+                // clear the note actually playing.
+                notes[note_p1] = 0;
+                notes[note_p2] = 0;
             } else  {
+                ctrl[time_ind] = tempo;
                 ctrl[note_ind] += 1;
+
+                // TODO: FIX DUPLICATE CODE
+                let note_index = ctrl[note_ind] & 0b0011_1111;
+                assert!(note_index <= 31);
+                notes[note_p1] = meas[i*64 + note_index as usize *2];
+                notes[note_p2] = meas[i*64 + note_index as usize *2+1];
             }
         }
     }
@@ -221,11 +256,8 @@ pub fn play_measure(sfx: usize, mut channel: usize) {
     // Find an available channel.
     if channel == 4 {
         channel = 0; // if not found, make 0.
-        let base_loc = 0b0000_0001;
-        let mut loc = 0;
-
         for i in 0..4 {
-            loc = base_loc << i;
+            let loc = 0b0000_0001 << i;
             if (loc & flag[0]) == 0 {
                 channel = i;
                 break;
@@ -233,21 +265,35 @@ pub fn play_measure(sfx: usize, mut channel: usize) {
         }
     }
 
-    // Enable channel
     assert!(channel < 4);
-    flag[0] = flag[0] | (0b0000_0001 << channel);
 
     // Copy sound effecj.
-    mem::mcpy_w(mem::OFF_MEAS_DATA.start + cart::SIZ_MEASURE_DATA*channel, sfx_loc.start, cart::SIZ_MEASURE_DATA);
-    mem::mcpy_w(mem::OFF_MEAS_META.start + cart::SIZ_MEASURE_META*channel, sfx_meta_loc.start, cart::SIZ_MEASURE_META);
+    mem::mcpy_w(mem::LOC_HARD.start + mem::OFF_MEAS_DATA.start + cart::SIZ_MEASURE_DATA*channel, sfx_loc.start, cart::SIZ_MEASURE_DATA);
+    mem::mcpy_w(mem::LOC_HARD.start + mem::OFF_MEAS_META.start + cart::SIZ_MEASURE_META*channel, sfx_meta_loc.start, cart::SIZ_MEASURE_META);
+
+    // Reset temp data
+    let ctrl = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_CTRL);
+    ctrl[channel*2] = 0;
+    ctrl[channel*2+1] = mem::peek(mem::OFF_MEAS_META.start + channel*cart::SIZ_MEASURE_META);
+
+    // Enable channel
+    flag[0] = flag[0] | (0b0000_0001 << channel);
 }
 
 // channel
-pub fn pause_measure() {
-
+pub fn pause_measure(channel: usize) {
+    // TODO: when paused, make it stop playing the note.
+    if channel >= 4 { return; }
+    // just need to un-enable it
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+    flag[0] = flag[0] & !(0b0000_0001 << channel);
 }
 
 // channel
-pub fn resume_measure() {
-
+pub fn resume_measure(channel: usize) {
+    // TODO: when resumed, make it play the note again.
+    if channel >= 4 { return; }
+    // just need to enable it :)
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+    flag[0] = flag[0] | 0b0000_0001 << channel;
 }

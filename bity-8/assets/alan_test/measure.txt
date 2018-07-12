@@ -1,5 +1,5 @@
 # 3 byte header
-0d # tempo
+10 # tempo
 02 00 # loop, volume, loop
 07 00 # instrument & volume, note
 07 01
