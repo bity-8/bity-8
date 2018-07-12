@@ -151,7 +151,7 @@ fn calc_data_loc(ind: usize, off: usize, nxt_off: usize, data_size: usize) -> me
     let size = (nxt_off - off) / data_size;
 
     if size > 0 && ind < size {
-        let end = off + ind * data_size;
+        let end = off + (ind+1) * data_size; // +1 for end of the length
         (off..end)
     } else {
         mem::LOC_NULL

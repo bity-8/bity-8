@@ -5,6 +5,7 @@ use self::bresenham::Bresenham;
 use memory as mem;
 use std::cmp;
 use display;
+use audio;
 
 pub fn load_std(lua: &mut hlua::Lua) {
     lua.openlibs(); // this is for testing, delete when not needed.
@@ -23,6 +24,9 @@ pub fn load_std(lua: &mut hlua::Lua) {
     lua.set("sqrt" , hlua::function1(|val: f32| -> f32             {f32::sqrt(val)}));
     lua.set("abs" , hlua::function1(|val: f32| -> f32              {f32::abs(val)}));
     lua.set("rand", hlua::function1(|_upper: f32| -> f32            {4f32}));
+
+    // Some sound functions :)
+    lua.set("play_sfx", hlua::function2(|sfx: i32, chan: i32| audio::play_measure(sfx as usize, chan as usize)));
     
     // PICO-8 Math bitwise: and, or, xor, not, rotl, rotr, left shift, right shift (arithmetic and logical)
     lua.set("band", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));

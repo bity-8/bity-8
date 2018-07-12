@@ -221,11 +221,8 @@ pub fn play_measure(sfx: usize, mut channel: usize) {
     // Find an available channel.
     if channel == 4 {
         channel = 0; // if not found, make 0.
-        let base_loc = 0b0000_0001;
-        let mut loc = 0;
-
         for i in 0..4 {
-            loc = base_loc << i;
+            let loc = 0b0000_0001 << i;
             if (loc & flag[0]) == 0 {
                 channel = i;
                 break;
