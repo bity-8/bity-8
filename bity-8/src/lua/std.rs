@@ -265,7 +265,10 @@ fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
     // Need to set right pixel in screen byte
     let mut pixel = mem::peek(get_buffer_loc(x_min as isize, y as isize));
     pixel = (pixel & 0xF0) | color;
-    mem::poke_w(get_buffer_loc(x_min as isize, y as isize), pixel);
+    // Why is this check needed? It prevents glitching pixels on the left side, but why?
+    if get_buffer_loc(0, y as isize + 1) > get_buffer_loc(x_min as isize, y as isize) {
+      mem::poke_w(get_buffer_loc(x_min as isize, y as isize), pixel);
+    }
     x_min += 1;
   }
   if (x_max & 1) == 0 {
