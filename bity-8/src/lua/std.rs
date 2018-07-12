@@ -57,6 +57,15 @@ pub fn load_std(lua: &mut hlua::Lua) {
       set_point(x,y,color);
     }));
 
+    lua.set("get_pixel", hlua::function2(|x:i32,y:i32| -> u8 {
+      let screen_cell = mem::peek(get_buffer_loc(x as usize, i as usize));
+      if (x & 1) == 0 {
+        screen_cell >> 4
+      } else {
+        screen_cell && 15
+      }
+    }));
+
     lua.set("draw_circle", hlua::function4(|x: i32, y: i32, radius: i32, color: u8| {
       // http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Fast-circle-algorithm-td4030808.html
 
