@@ -281,11 +281,19 @@ pub fn play_measure(sfx: usize, mut channel: usize) {
 }
 
 // channel
-pub fn pause_measure() {
-
+pub fn pause_measure(channel: usize) {
+    // TODO: when paused, make it stop playing the note.
+    if channel >= 4 { return; }
+    // just need to un-enable it
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+    flag[0] = flag[0] & !(0b0000_0001 << channel);
 }
 
 // channel
-pub fn resume_measure() {
-
+pub fn resume_measure(channel: usize) {
+    // TODO: when resumed, make it play the note again.
+    if channel >= 4 { return; }
+    // just need to enable it :)
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+    flag[0] = flag[0] | 0b0000_0001 << channel;
 }

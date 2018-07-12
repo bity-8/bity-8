@@ -27,6 +27,8 @@ pub fn load_std(lua: &mut hlua::Lua) {
 
     // Some sound functions :)
     lua.set("play_sfx", hlua::function2(|sfx: i32, chan: i32| audio::play_measure(sfx as usize, chan as usize)));
+    lua.set("pause_sfx", hlua::function1(|chan: i32| audio::pause_measure(chan as usize)));
+    lua.set("resume_sfx", hlua::function1(|chan: i32| audio::resume_measure(chan as usize)));
     
     // PICO-8 Math bitwise: and, or, xor, not, rotl, rotr, left shift, right shift (arithmetic and logical)
     lua.set("band", hlua::function2(|val1: i32, val2: i32| -> i32   {val1 & val2}));

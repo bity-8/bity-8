@@ -11,8 +11,11 @@ end
 
 inst = 0x1A
 function _update()
-   if btn(7) then play_sfx(0, 4) end
+   if btn(7) then play_sfx(0, 0) end
    if btn(6) then inst = math.floor(math.random() * 4) * 16 + 0xA end
+
+   if btn(6) then pause_sfx(0)
+   else resume_sfx(0) end
 
    -- if btn(0) then _poke(0x40035, 0x40) _poke(0x40034, inst)
    -- else _poke(0x40034, 0x00) end -- chan 1
