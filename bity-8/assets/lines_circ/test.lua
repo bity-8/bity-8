@@ -1,3 +1,6 @@
+-- ripped from pico-8 tweetcart.
+-- credit goes to:
+-- https://twitter.com/Jusiv_/status/1015791828841271298
 -- A basic drawing thing.
 -- set the palette.
 colors = {255, 255, 255,
