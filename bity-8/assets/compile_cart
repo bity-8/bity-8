@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import sys
 
 sprite  = {'max': 64, 'len': 3456, 'siz': 0}
 palette = {'max': 16, 'len': 48, 'siz': 0}

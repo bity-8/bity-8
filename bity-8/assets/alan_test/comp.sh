@@ -1,3 +1,4 @@
 #!/bin/bash
 
-../compile_cart --sprite ss.sht --tile tile.map --code test.lua out.b8
+../hex_to_bin measure.txt measure.mes
+../compile_cart --sprite ss.sht --tile tile.map --measure measure.mes --code test.lua out.b8

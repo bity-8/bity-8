@@ -8,6 +8,7 @@ use sdl2::audio::AudioDevice;
 use sdl2::audio::AudioCallback;
 use self::sdl2::Sdl;
 use memory as mem;
+use cartridge as cart;
 
 const SAMPLES:   u32 = 256;
 const BITY_SAMP: f32 = 128f32;
@@ -135,8 +136,8 @@ pub fn update_mem_measure() {
     // 0000_0000 . 0000_00  . 00 00    00_0000
     let meta = mem::get_sub_area(mem::LOC_HARD, mem::OFF_MEAS_META);
 
-    // tempo     . beg_loop   volume . end_loop X 4 channels
-    // 0000_0000 . 0000_00  . 00 00    00_0000
+    // reserved . music playing . sfx playing (3, 2, 1, 0)
+    // 000      . 0             . 0000
     let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
 
     for i in 0..4 {
@@ -190,26 +191,63 @@ pub fn update_mem_measure() {
     }
 }
 
+// music
 pub fn play_music() {
 
 }
 
+// <no params>
 pub fn pause_music() {
 
 }
 
+// <no params>
 pub fn resume_music() {
 
 }
 
-pub fn play_measure() {
+// If variables are out of bounds, do NOTHING.
+// channel = 4, find available channel (or channel 0 if no available channel found.
+pub fn play_measure(sfx: usize, mut channel: usize) {
+    if channel > 5 { return; }
+    let sfx_loc = cart::get_measure_data_loc(sfx);
+    let sfx_meta_loc = cart::get_measure_meta_loc(sfx);
+    if sfx_loc == mem::LOC_NULL { return; }
+    assert!(sfx_loc.end - sfx_loc.start > 0);
+    assert!(sfx_meta_loc.end - sfx_meta_loc.start > 0);
 
+    let flag = mem::get_sub_area(mem::LOC_HARD, mem::OFF_CHAN_FLAG);
+
+    // Find an available channel.
+    if channel == 4 {
+        channel = 0; // if not found, make 0.
+        let base_loc = 0b0000_0001;
+        let mut loc = 0;
+
+        for i in 0..4 {
+            loc = base_loc << i;
+            if (loc & flag[0]) == 0 {
+                channel = i;
+                break;
+            }
+        }
+    }
+
+    // Enable channel
+    assert!(channel < 4);
+    flag[0] = flag[0] | (0b0000_0001 << channel);
+
+    // Copy sound effecj.
+    mem::mcpy_w(mem::OFF_MEAS_DATA.start + cart::SIZ_MEASURE_DATA*channel, sfx_loc.start, cart::SIZ_MEASURE_DATA);
+    mem::mcpy_w(mem::OFF_MEAS_META.start + cart::SIZ_MEASURE_META*channel, sfx_meta_loc.start, cart::SIZ_MEASURE_META);
 }
 
+// channel
 pub fn pause_measure() {
 
 }
 
+// channel
 pub fn resume_measure() {
 
 }
