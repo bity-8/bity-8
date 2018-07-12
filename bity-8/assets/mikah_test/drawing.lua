@@ -31,6 +31,8 @@ function _update()
   if shouldDraw then
     tilemap(0,0,tilex,tiley)
     sprite_t(0,4,2,spritex,spritey,15)
+    print("Welcome to BITY-8! °", 10, 17, 1, 16)
+    print(spritex..", "..spritey, 10, 10, 1, 16)
     shouldDraw = false;
   end
   if btn(5) then
