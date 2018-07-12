@@ -13,19 +13,24 @@ pub const MAX_INSTRUMENT: usize = 4;
 pub const MAX_MEASURE:    usize = 256;
 pub const MAX_SONG:       usize = 1024;
 
-// Measured in bytes
+// Some Sizes
+pub const SIZ_MEASURE_DATA: usize = 64;
+pub const SIZ_MEASURE_META: usize = 3;
+pub const SIZ_OFFSET: usize = 3;
+
+// Section Sizes
 pub const SIZ_SPRITE:     usize = 3456;
 pub const SIZ_PALETTE:    usize = 48;
 pub const SIZ_TILE_MAP:   usize = 6912;
 pub const SIZ_INSTRUMENT: usize = 128;
-pub const SIZ_MEASURE:    usize = 67;
+pub const SIZ_MEASURE:    usize = SIZ_MEASURE_DATA + SIZ_MEASURE_META; // 67
 pub const SIZ_SONG:       usize = 6;
 
 // Assumes the memory offset has a length of three.
 fn get_off(offset: mem::MemLoc) -> usize {
-    assert!(offset.end - offset.start == 3);
+    assert!(offset.end - offset.start == SIZ_OFFSET);
     let arr = mem::get_area(offset);
-    assert!(arr.len() == 3);
+    assert!(arr.len() == SIZ_OFFSET);
     // Big Endian
     let mut end  =  arr[2] as usize;
     end |= (arr[1] as usize) << 8;
@@ -35,7 +40,7 @@ fn get_off(offset: mem::MemLoc) -> usize {
 
 // Returns the length of the offset, and the modulus (for errors).
 fn get_off_info(loc: mem::MemLoc, siz: usize) -> (usize, usize) {
-    let nxt_loc = (loc.start+3)..(loc.end+3); // Assuming all the offsets have a size of 3.
+    let nxt_loc = (loc.start+SIZ_OFFSET)..(loc.end+SIZ_OFFSET); // Assuming all the offsets have a size of SIZ_OFFSET.
     let nxt = get_off(nxt_loc);
     let loc = get_off(loc);
     calc_off_data(loc, nxt, siz)
@@ -134,7 +139,7 @@ pub fn check_offsets() {
 
 // helper function for getting locations
 fn get_data_loc(ind: usize, loc: mem::MemLoc, data_size: usize) -> mem::MemLoc {
-    let nxt_loc = (loc.start+3)..(loc.end+3);
+    let nxt_loc = (loc.start+SIZ_OFFSET)..(loc.end+SIZ_OFFSET);
     let off  = get_off(loc);
     let nxt_off = get_off(nxt_loc);
 
@@ -160,6 +165,29 @@ pub fn get_instrument_loc(ind: usize) -> mem::MemLoc { get_data_loc(ind, mem::CO
 pub fn get_measure_loc(ind: usize)    -> mem::MemLoc { get_data_loc(ind, mem::COFF_MEASURE,    SIZ_MEASURE)    }
 pub fn get_song_loc(ind: usize)       -> mem::MemLoc { get_data_loc(ind, mem::COFF_SONG,       SIZ_SONG)       }
 pub fn get_code_loc()                 -> mem::MemLoc { let code = get_off(mem::COFF_CODE); (code..mem::LOC_CART.end) }
+
+// The audio format has things mixed into it.
+pub fn get_measure_data_loc(ind: usize) -> mem::MemLoc {
+    let m = get_measure_loc(ind);
+    if m != mem::LOC_NULL {
+        assert!(m.end - m.start > 0);
+        assert!(m.end -  (m.start + SIZ_MEASURE_META) == SIZ_MEASURE_DATA);
+        (m.start+SIZ_MEASURE_META)..(m.end)
+    } else {
+        m
+    }
+}
+
+// The audio format has things mixed into it.
+pub fn get_measure_meta_loc(ind: usize) -> mem::MemLoc {
+    let m = get_measure_loc(ind);
+    if m != mem::LOC_NULL {
+        assert!(m.end - m.start > 0);
+        (m.start)..(m.start+SIZ_MEASURE_META)
+    } else {
+        m
+    }
+}
 
 pub fn get_code_string() -> String {
     // TODO: make this more professional for the cartridge, and use the offsets specified at the

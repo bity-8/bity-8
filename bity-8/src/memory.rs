@@ -46,9 +46,9 @@ pub const OFF_INPUT:     MemLoc = (0x31..0x32); // Input
 pub const OFF_NOTES:     MemLoc = (0x32..0x42); // Current Notes. 2 bytes per note, 2 notes per channel (prev and next).
 pub const OFF_MEAS_META: MemLoc = (0x42..0x4e); // loaded from cart, looping + volume, tempo
 pub const OFF_MEAS_CTRL: MemLoc = (0x4e..0x56); // only in memory, 1 byte for current note length left, 5 bits for current note . 3 bits reserved
-pub const OFF_CHAN_FLAG: MemLoc = (0x56..0x57); // only in memory, reserved . music playing . sfx playing, 000      . 0             . 0000
+pub const OFF_CHAN_FLAG: MemLoc = (0x56..0x57); // only in memory
 pub const OFF_SONG_META: MemLoc = (0x57..0x5D); // loaded from cart
-pub const OFF_MEAS:      MemLoc = (0x100..0x200); // loaded from cart, 64 bytes per measure, 4 channels
+pub const OFF_MEAS_DATA: MemLoc = (0x100..0x200); // loaded from cart, 64 bytes per measure, 4 channels
 
 // --- 8 Instruments ---
 pub const OFF_INS1: MemLoc = (0x000..0x080);
