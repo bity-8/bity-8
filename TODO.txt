@@ -4,7 +4,7 @@ Rust
 
   Graphics Engine
   [x] Display sprites
-  [ ] Display tiles
+  [x] Display tiles
 
   Audio Engine
   [x] Play notes
@@ -12,18 +12,18 @@ Rust
 
   Cartridge Parsing
   [x] Extract Lua code
-  [ ] Extract spritesheets
-  [ ] Extract tilemaps
-  [ ] Extract audio
+  [x] Extract spritesheets
+  [x] Extract tilemaps
+  [x] Extract audio
 
 
 
 Lua
   BITY-8 Standard Library
-  [ ] Load spritesheets
-  [ ] Load tilemaps
+  [x] Load spritesheets
+  [x] Load tilemaps
   [x] Draw sprites
-  [ ] Draw tiles
+  [x] Draw tiles
   [ ] Load palette from spritesheet
   [x] Set palette colors manually
   [x] Draw lines
