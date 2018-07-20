@@ -58,11 +58,11 @@ pub fn load_std(lua: &mut hlua::Lua) {
     }));
 
     lua.set("get_pixel", hlua::function2(|x:i32,y:i32| -> u8 {
-      let screen_cell = mem::peek(get_buffer_loc(x as usize, i as usize));
+      let screen_cell = mem::peek(get_buffer_loc(x as isize, y as isize));
       if (x & 1) == 0 {
         screen_cell >> 4
       } else {
-        screen_cell && 15
+        screen_cell & 15
       }
     }));
 
