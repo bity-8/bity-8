@@ -136,16 +136,36 @@ impl<'a> Emulator<'a> {
 }
 
 fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashSet<Keycode> {
+    // keys = currently held keys
     let keys: HashSet<Keycode> = events.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
 
-    // Get the difference between the new and old sets.
-    let new_keys = &keys - &prev_keys;
-    let old_keys = &prev_keys - &keys;
+    // Possible way to rewrite this:
+    // - Get currently pressed keys
+    // - Loop through set of keys
+    // - Match against key
+    // - Set bit if pressed
+    // This does avoid looping through two sets of keys and doing set math.
 
-    if !new_keys.is_empty() || !old_keys.is_empty() {
+    // Get the difference between the new and old sets.
+
+    // pressed_keys = current set of keys - last set of keys
+    // Results in a set of keys that were not pressed last time
+    // If nothing changed, pressed_keys is empty
+    let pressed_keys = &keys - &prev_keys;
+
+    // released_keys = last set of keys - current set of keys
+    // Results in a set of keys that are not pressed now 
+    // that were pressed last time.
+    // If nothing changed, released_keys is empty
+    let released_keys = &prev_keys - &keys;
+
+    if !pressed_keys.is_empty() || !released_keys.is_empty() {
         let hw_cfg = mem::get_sub_area(mem::LOC_HARD, mem::OFF_INPUT);
         
-        for key in old_keys {
+        // Because we are only using sets of newly pressed or released keys,
+        // we can't wipe the input register and OR everything back in. We
+        // instead XOR to toggle bits on and off.
+        for key in released_keys {
             match key {
                 Keycode::Up => {
                     hw_cfg[0] ^= UP_BTN;
@@ -175,7 +195,7 @@ fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashS
             }
         }
      
-        for key in new_keys {
+        for key in pressed_keys {
             match key {
                 Keycode::Up => {
                     hw_cfg[0] ^= UP_BTN;
