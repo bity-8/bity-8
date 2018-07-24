@@ -7,16 +7,17 @@ use lua;
 use memory as mem;
 
 use sdl2::event::Event;
+use sdl2::gfx::framerate::FPSManager;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::gfx::framerate::FPSManager;
 use sdl2::Sdl;
-use std::collections::HashSet;
-use std::time::SystemTime;
 
+use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
+use std::time::SystemTime;
 
+// Masks for checking for button presses
 const LEFT_BTN:  u8 = 0b0000_0001u8;
 const RIGHT_BTN: u8 = 0b0000_0010u8;
 const UP_BTN:    u8 = 0b0000_0100u8;
@@ -25,6 +26,8 @@ const O_BTN:     u8 = 0b0001_0000u8;
 const X_BTN:     u8 = 0b0010_0000u8;
 const PLUS_BTN:  u8 = 0b0100_0000u8;
 const MINUS_BTN: u8 = 0b1000_0000u8;
+
+const FPS_TARGET_RATE: u32 = 60;
 
 pub struct Emulator<'a> {
     pub sdl: Sdl,
@@ -37,10 +40,11 @@ impl<'a> Emulator<'a> {
     pub fn new() -> Emulator<'a> {
         let mut sdl = sdl2::init().unwrap();
         let channels = [
-            audio::Channel::new(&mut sdl, 0), audio::Channel::new(&mut sdl, 1),
-            audio::Channel::new(&mut sdl, 2), audio::Channel::new(&mut sdl, 3),
+            audio::Channel::new(&mut sdl, 0),
+            audio::Channel::new(&mut sdl, 1),
+            audio::Channel::new(&mut sdl, 2),
+            audio::Channel::new(&mut sdl, 3),
         ];
-
         let l = lua::create_lua();
 
         Emulator {
@@ -51,24 +55,29 @@ impl<'a> Emulator<'a> {
     }
 
     pub fn run(&mut self) {
-        // Measured in nano seconds.
-        let fps = Duration::from_secs(1).checked_div(60).unwrap();
+        // Create window and texture to draw to
         let video_subsystem = self.sdl.video().unwrap();
-        let window = video_subsystem.window("BITY-8",
-                                            display::SCR_X*display::PIX_LEN,
-                                            display::SCR_Y*display::PIX_LEN)
+        let window = video_subsystem
+            .window(
+                "BITY-8",
+                display::SCR_X*display::PIX_LEN,
+                display::SCR_Y*display::PIX_LEN,
+            )
             .position_centered()
             .build()
             .unwrap();
-
         let mut canvas = window.into_canvas()
             .target_texture()
             .present_vsync()
-            .build() .unwrap();
-
+            .build()
+            .unwrap();
         let texture_creator = canvas.texture_creator();
         let mut texture = texture_creator
-            .create_texture_streaming(PixelFormatEnum::RGB888, display::SCR_X, display::SCR_Y)
+            .create_texture_streaming(
+                PixelFormatEnum::RGB888,
+                display::SCR_X,
+                display::SCR_Y,
+            )
             .unwrap();
 
         let mut events = self.sdl.event_pump().unwrap();
@@ -80,8 +89,11 @@ impl<'a> Emulator<'a> {
         // start sound
         for x in self.channels.iter() { x.device.resume(); }
 
+        // Measured in nano seconds.
+        let time_between_frames = Duration::from_secs(1)
+            .checked_div(FPS_TARGET_RATE).unwrap();
         let mut fps_mgr = FPSManager::new();
-        fps_mgr.set_framerate(60)
+        fps_mgr.set_framerate(FPS_TARGET_RATE)
             .expect("Error when setting framerate!");
         let mut timer = SystemTime::now();
         let mut frames = 0;
@@ -126,8 +138,9 @@ impl<'a> Emulator<'a> {
             // TODO: put a match here.
             let elapsed = now.elapsed();
 
-            if fps > elapsed {
-                let diff = fps.checked_sub(elapsed).unwrap();
+            // Don't unnecessarily max out the CPU
+            if time_between_frames > elapsed {
+                let diff = time_between_frames.checked_sub(elapsed).unwrap();
                 // println!("elapsed: {}, sleep: {}", elapsed.subsec_nanos(), diff.subsec_nanos());
                 thread::sleep(diff);
             }
@@ -136,8 +149,10 @@ impl<'a> Emulator<'a> {
 }
 
 fn get_input(events: &mut sdl2::EventPump, prev_keys: HashSet<Keycode>) -> HashSet<Keycode> {
-    // keys = currently held keys
-    let keys: HashSet<Keycode> = events.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
+    let keys: HashSet<Keycode> = events.keyboard_state()
+        .pressed_scancodes()
+        .filter_map(Keycode::from_scancode)
+        .collect();
 
     // Possible way to rewrite this:
     // - Get currently pressed keys
