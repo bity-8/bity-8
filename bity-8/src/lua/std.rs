@@ -115,13 +115,13 @@ pub fn load_std(lua: &mut hlua::Lua) {
       let tile_offset_y = (screen_offset_y.abs() >> 3) as usize;
       let num_sprites_x = {
         if (screen_offset_x.abs() & 7) != 0 {
-          24 // This should be 25 once the scrambled sprites issue is fixed
+          25 // This should be 25 once the scrambled sprites issue is fixed
         } else {
           24
         }
       };
       let num_sprites_y = {
-        if (screen_offset_x.abs() & 7) != 0 {
+        if (screen_offset_y.abs() & 7) != 0 {
           18 // This should be 19 once the scrambled sprites issue is fixed
         } else {
           18
@@ -130,11 +130,16 @@ pub fn load_std(lua: &mut hlua::Lua) {
 
       for y in 0..num_sprites_y {
         for x in 0..num_sprites_x {
-          let tilemap_offset = mem::LOC_TILE.start + (map * 0x1B00) as usize + x + tile_offset_x + ((y + tile_offset_y) * 96);
+          let tilemap_offset = mem::LOC_TILE.start + 
+                               (map * 0x1B00) as usize + 
+                               x + 
+                               tile_offset_x + 
+                               ((y + tile_offset_y) * 96);
           let tilemap_data = mem::peek(tilemap_offset) ;
           let spritesheet_x = tilemap_data >> 4;
           let spritesheet_y = tilemap_data & 15;
-          let screen_x = (x << 3) as i32 - (screen_offset_x.abs() & 7) as i32; // Bitshifting math should be faster than multiplication and modulus division
+          // Bitwise math should be faster than multiplication and modulus division
+          let screen_x = (x << 3) as i32 - (screen_offset_x.abs() & 7) as i32; 
           let screen_y = (y << 3) as i32 - (screen_offset_y.abs() & 7) as i32;
           //println!("Printing ({},{}) at ({},{})\tTilemap data: 0x{:x}\t", spritesheet_x, spritesheet_y, screen_x, screen_y, tilemap_data);
           draw_sprite(sheet, spritesheet_x.into(), spritesheet_y.into(), screen_x, screen_y, 1);
@@ -191,26 +196,37 @@ fn draw_line(x1:i32,y1:i32,x2:i32,y2:i32,color:u8) {
       }
 }
 
+// size is intended to be a scalar variable (1 = 8x8 sprite, 2 = 16x16 sprite, etc)
 fn draw_sprite(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32) {
   let mut sprite_offset = mem::LOC_SPRI.start + (src_x as usize * 4) + (48 * src_y*8) as usize + (src_sheet * 0xD80) as usize;
   let start = cmp::max(cmp::min(y,0).abs(), 0);
   if (x & 1) == 1 {
     for i in start..8*size as i32 {
-    for j in 0..4*size as i32 {
-      let sprite_pixel = mem::peek(sprite_offset + j as usize + (48 * i) as usize);
-      set_point(x + j * 2, y + i, sprite_pixel >> 4);
-      set_point(x + j * 2 + 1, y + i, sprite_pixel & 15);
+      for j in 0..4*size as i32 {
+        if (x + j * 2) > 191 {
+          continue;
+        }
+        let sprite_pixel = mem::peek(sprite_offset + j as usize + (48 * i) as usize);
+        set_point(x + j * 2, y + i, sprite_pixel >> 4);
+        if (x + j * 2 + 1) > 191 {
+          continue;
+        }
+        set_point(x + j * 2 + 1, y + i, sprite_pixel & 15);
+      }
     }
-  }
   } else {
     for i in start..8*size as i32 {
       if sprite_offset < mem::LOC_SCRE.start {
         println!("Line out of bounds");
         continue;
       }
+      // I think this handles drawing off the left edge...
       let length = (size*4) as i32 + cmp::min(x/2, 0);
       if length < (size*4) as i32 {
         mem::mcpy_w(get_buffer_loc(0 as isize,(y+i as i32) as isize), sprite_offset + (x.abs()/2) as usize, length as usize);
+      } else if length + x > 191 {
+        let length = (192 - x) / 2;
+        mem::mcpy_w(get_buffer_loc(x as isize,(y+i as i32) as isize), sprite_offset as usize, length as usize);
       } else {
         mem::mcpy_w(get_buffer_loc(x as isize,(y+i as i32) as isize), sprite_offset as usize, (size*4) as usize);
       }
