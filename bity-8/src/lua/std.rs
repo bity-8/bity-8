@@ -110,6 +110,9 @@ pub fn load_std(lua: &mut hlua::Lua) {
       let mem_loc = mem::LOC_SPRI.start + (dest as usize * cart::SIZ_SPRITE);
       mem::mcpy_w(mem_loc, sprites_loc, cart::SIZ_SPRITE);
     }));
+    lua.set("pal", hlua::function1(|index: u32| {
+      load_palette(index);
+    }));
     lua.set("tilemap", hlua::function4(|map: u32, sheet: u32, screen_offset_x: i32, screen_offset_y: i32| {
       let tile_offset_x = (screen_offset_x.abs() >> 3) as usize;
       let tile_offset_y = (screen_offset_y.abs() >> 3) as usize;
@@ -244,6 +247,12 @@ fn draw_sprite_transparent(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i3
       }
     }
   }
+}
+
+fn load_palette(index: u32) {
+  let palette_loc = cart::get_palette_loc(index as usize).start;
+  let mem_loc = mem::LOC_HARD.start;
+  mem::mcpy_w(mem_loc, palette_loc, cart::SIZ_PALETTE);
 }
 
 fn draw_font(src_x: u32, src_y: u32, x: i32, y: i32, fg: u8, bg: u8) {
