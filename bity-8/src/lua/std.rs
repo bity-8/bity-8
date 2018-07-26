@@ -203,14 +203,8 @@ fn draw_sprite(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32
   if (x & 1) == 1 {
     for i in start..8*size as i32 {
       for j in 0..4*size as i32 {
-        if (x + j * 2) > 191 {
-          continue;
-        }
         let sprite_pixel = mem::peek(sprite_offset + j as usize + (48 * i) as usize);
         set_point(x + j * 2, y + i, sprite_pixel >> 4);
-        if (x + j * 2 + 1) > 191 {
-          continue;
-        }
         set_point(x + j * 2 + 1, y + i, sprite_pixel & 15);
       }
     }
@@ -224,7 +218,7 @@ fn draw_sprite(src_sheet: u32, src_x: u32, src_y: u32, x: i32, y: i32, size: u32
       let length = (size*4) as i32 + cmp::min(x/2, 0);
       if length < (size*4) as i32 {
         mem::mcpy_w(get_buffer_loc(0 as isize,(y+i as i32) as isize), sprite_offset + (x.abs()/2) as usize, length as usize);
-      } else if length + x > 191 {
+      } else if length + x >= 190 {
         let length = (192 - x) / 2;
         mem::mcpy_w(get_buffer_loc(x as isize,(y+i as i32) as isize), sprite_offset as usize, length as usize);
       } else {
@@ -275,7 +269,7 @@ fn draw_font(src_x: u32, src_y: u32, x: i32, y: i32, fg: u8, bg: u8) {
 }
 
 fn in_bounds(x:i32, y:i32) -> bool {
-  x >= 0 && x < display::SCR_X as i32 && y >= 0 && y < display::SCR_Y as i32
+  x >= 0 && x < display::SCR_X  as i32 && y >= 0 && y < display::SCR_Y as i32
 }
 
 fn draw_horiz_line(x1:i32,x2:i32,y:i32,color:u8) {
