@@ -1,0 +1,35 @@
+# 3 byte header
+10 # tempo
+02 00 # loop, volume, loop
+07 2b # instrument & volume, note
+07 2b
+07 2b
+00 00
+07 29
+07 29
+07 29
+00 00
+07 27
+07 27
+07 27
+00 00
+07 29
+07 29
+07 29
+00 00
+07 2b # instrument & volume, note
+07 2b
+07 2b
+00 00
+07 2b # instrument & volume, note
+07 2b
+07 2b
+00 00
+07 2b # instrument & volume, note
+07 2b
+07 2b
+00 00
+07 27
+07 27
+07 27
+00 00
