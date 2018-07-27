@@ -61,6 +61,18 @@ pub fn open(file: &Path) {
     let mut f = File::open(file).expect("cart not found");
     let buffer = mem::get_area(mem::LOC_CART);
 
+    // Don't load cartridges bigger than the max cartridge size
+    let file_metadata = f.metadata()
+        .expect("could not get metadata for cartridge file");
+    let cart_size = file_metadata.len();
+    let max_cart_size = buffer.len() as u64;
+    if cart_size > max_cart_size {
+        panic!(
+            "cartridge file size cannot be greater than {} bytes",
+            max_cart_size
+        );
+    }
+
     // read up to the cartridge
     match f.read_exact(buffer) {
         Ok(_) => ..,
