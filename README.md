@@ -24,10 +24,6 @@ Display:   192x144 screen
            60 FPS
 Input:     D-pad, A, B, START, SELECT
            4 controllers
-Sound:     4 channel
-           8 instruments (128 samples, 8-bit amplitudes)
-           88-key (piano) range
-           60 notes a second
 Memory:    256KB read area
            64KB  read/write area
 Music:     32 2-byte note measures, 4 measure staves
@@ -36,17 +32,16 @@ Map:       96x72 8-bit cell maps
            0-31 maps
 Sprite:    96x72 4-bit pixel sheets
            0-63 sheets
-```
-
-### Sound Specs
-More sound specs:
-```
-4 Default Waves, 4 Extra Waves
-   Default Waves: Square, Sawtooth, Triangle, Noise waves
+Sound:     4 channel
+           8 instruments (128 samples, 8-bit amplitudes)
+           88-key (piano) range
+           60 notes a second
+           4 default waves (square, sawtooth, triangle, noise)
+           4 custom waves
 ```
 
 ## Standard Library
-Note, this is prone to change a lot. We are still in alpha development.
+Here is the list of supported standard library functions so far:
 
 ```
 _peek _poke _mset _mcpy
@@ -59,11 +54,7 @@ _rotl
 _draw_rect _draw_line
 ```
 
-## Testing
-This will change soon, but for right now:
-```
-cargo run assets/test.lua
-```
+Note that the standard library is still in alpha, and may change at any time.
 
 ## Running Alpha
 This assumes that you already have rust installed on your system. If you don't,
@@ -95,13 +86,3 @@ cargo run out.b8
 ```
 
 That's it, you have the alpha version of BITY-8 running on your machine now.
-
-## TODO
-This is for the developers.
-
-```
-TODO: make draw_rect more efficient than draw_line
-TODO: logo screen
-TODO: draw text, font in memory.
-TODO: error messages (wait till the project is more stable though).
-```
