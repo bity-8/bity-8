@@ -65,6 +65,37 @@ This will change soon, but for right now:
 cargo run assets/test.lua
 ```
 
+## Running Alpha
+This assumes that you already have rust installed on your system. If you don't,
+see [this](https://doc.rust-lang.org/book/ch01-01-installation.html).
+
+Next, make sure you have both the `sdl2` and `sdl2_gfx` developer packages
+installed on your system. On Arch Linux, this looks like:
+```bash
+sudo pacman -S sdl2 sdl2_gfx
+```
+
+If you have a different operating system/package manager, you may want to
+consult [this page](https://github.com/Rust-SDL2/rust-sdl2).
+
+After meeting those two requirements, it should be simple to run BITY-8 on your
+machine:
+```bash
+# Clone the repo
+git clone https://github.com/bity-8/bity-8.git
+
+# Go into the demo directory.
+cd bity-8/bity-8/assets/demo
+
+# Compile the demo program.
+./comp.sh
+
+# And run the demo program with BITY-8!
+cargo run out.b8
+```
+
+That's it, you have the alpha version of BITY-8 running on your machine now.
+
 ## TODO
 This is for the developers.
 

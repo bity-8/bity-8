@@ -82,5 +82,4 @@ function _update()
   if btn(4) then
     play_sfx(0, 0)
   end
-  
 end
