@@ -1,6 +1,5 @@
-# Bity-8
+# <img src="logo.png" />
 
-## About
 BITY-8 is a fantasy console comparable to many others fantasy consoles: PICO-8,
 TIC-80, LICO-12, PV8, and many more!
 
