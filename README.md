@@ -12,6 +12,8 @@ hardware for the fantasy console has never existed before, but it could!
 Fantasy consoles are slowly gaining popularity because they are fun to play
 with and fun to develop with. Begin your BITY-8 journey today!
 
+<img src="bity8_example.png" />
+
 ## Hardware Specifications
 ### Main Specs
 Specs may slightly change during alpha. But most are set in stone.
